@@ -6,7 +6,7 @@ CLEAN = efface
 CPPFLAGS = -std=c++11 -c -Wall
 RMFLAGS = -f
 EDLFLAGS = -std=c++11
-LIBS = -libtp.a -ncurses -tcl
+LIBS = -l tp -l ncurses -l tcl
 LIBSPATH = -L/public/tp/tp-multitache
 INTERFACE = Mere.h 
 REAL = $(INTERFACE:.h=.cpp)
