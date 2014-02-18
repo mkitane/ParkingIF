@@ -40,6 +40,7 @@
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 static pid_t noClavier;
+static pid_t noHeure;
 int main (void)
 //Algorithme :
 {
@@ -51,9 +52,12 @@ int main (void)
 		Clavier();
 	}else{
 		/*Code du pere */
+		noHeure = ActiverHeure();
 
 		waitpid(noClavier, NULL, 0); //On attends la reception de Q du clavier
 
+		//Fin de tache heure apres reception de SIGUSR2
+		kill(noHeure, SIGUSR2);
 
 
 		TerminerApplication();
