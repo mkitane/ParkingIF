@@ -13,6 +13,7 @@
 
 //------------------------------------------------------ Include personnel
 #include "Clavier.h"
+#include "/public/tp/tp-multitache/Outils.h"
 
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
@@ -51,6 +52,17 @@ void Commande(char code, unsigned int valeur)
 	{
 		case 'Q' :
 			exit(0);
+			break;
+		case 'P' :
+			Afficher(MESSAGE,"P pressed");
+			break;
+		case 'A' :
+			Afficher(MESSAGE,"A pressed");
+			break;
+		case 'S' :
+			Afficher(MESSAGE,"S pressed");
+			break;
+		default :
 			break;
 	}
 }

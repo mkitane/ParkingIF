@@ -54,7 +54,7 @@ int main (void)
 		/*Code du pere */
 		noHeure = ActiverHeure();
 
-		waitpid(noClavier, NULL, 0); //On attends la reception de Q du clavier
+		waitpid(noClavier, NULL, 0); //On attend la reception de Q du clavier
 
 		//Fin de tache heure apres reception de SIGUSR2
 		kill(noHeure, SIGUSR2);
