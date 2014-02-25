@@ -18,14 +18,14 @@
 
 /////////////////////////////////////////////////////////////////  INCLUDE
 //--------------------------------------------------- Interfaces utilisées
-#include "/public/tp/tp-multitache/Outils.h"
+
 //------------------------------------------------------------- Constantes
 
 //------------------------------------------------------------------ Types
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-void Entree(TypeBarriere Parametrage);
+void Entree(int Parametrage);
 //TODO : CHANGER LE INT PARAMETRAGE PLUTARD
 // Mode d'emploi :
 //

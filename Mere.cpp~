@@ -17,7 +17,6 @@
 //------------------------------------------------------ Include personnel
 #include "Mere.h"
 #include "Clavier.h"
-#include "Entree.h"
 #include "/public/tp/tp-multitache/Outils.h"
 #include "/public/tp/tp-multitache/Heure.h"
 ///////////////////////////////////////////////////////////////////  PRIVE
@@ -59,8 +58,9 @@ int main (void)
 		noHeure = ActiverHeure();
 
 		if( (noEntreeUn = fork()) ==0){
-			/*Code du fils */
+		/*Code du fils */
 			Entree(PROF_BLAISE_PASCAL);
+
 
 		}else{
 
@@ -69,10 +69,7 @@ int main (void)
 
 		//Fin de tache heure apres reception de SIGUSR2
 		kill(noHeure, SIGUSR2);
-
-		//Demande Fin vers Entree1
 		kill(noEntreeUn,SIGUSR2);
-		waitpid(noEntreeUn,NULL,0);
 
 		TerminerApplication();
 		exit(0);

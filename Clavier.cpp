@@ -39,7 +39,7 @@ void Clavier()
 // Algorithme :
 //
 {
-	while(true){
+	for(;;){
 		Menu();
 	}
 } //----- fin de Nom
