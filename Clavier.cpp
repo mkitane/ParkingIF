@@ -14,7 +14,9 @@
 //------------------------------------------------------ Include personnel
 #include "Clavier.h"
 #include "/public/tp/tp-multitache/Outils.h"
-
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/types.h>
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
 
@@ -35,10 +37,14 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
+static int descW ;
+static int compteurVoiture = 0;
 void Clavier()
 // Algorithme :
 //
 {
+	descW = open("fifo1",O_WRONLY);
+
 	for(;;){
 		Menu();
 	}
@@ -48,21 +54,25 @@ void Commande(char code, unsigned int valeur)
 // Algorithme :
 //
 {
-	switch(code)
-	{
-		case 'Q' :
-			exit(0);
-			break;
-		case 'P' :
-			Afficher(MESSAGE,"P pressed");
-			break;
-		case 'A' :
-			Afficher(MESSAGE,"A pressed");
-			break;
-		case 'S' :
-			Afficher(MESSAGE,"S pressed");
-			break;
-		default :
-			break;
+	if(code == 'Q'){
+		close(descW);
+		exit(0);
+	}else if(code == 'P'){
+		char c = 'c';
+		Afficher(MESSAGE,"P pressed");
+		compteurVoiture++;
+		if(compteurVoiture > 999){
+			compteurVoiture=0;
+		}
+		if(valeur == 1){
+			write(descW,&c,sizeof(c));
+		}
+		if(valeur == 2){
+
+		}
+	}else if(code == 'A'){
+		Afficher(MESSAGE,"A pressed");
+	}else if(code == 'S'){
+		Afficher(MESSAGE,"S pressed");
 	}
 }

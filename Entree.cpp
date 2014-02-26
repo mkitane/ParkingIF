@@ -14,6 +14,10 @@
 //------------------------------------------------------ Include personnel
 #include "Entree.h"
 #include <signal.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <iostream>
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
 
@@ -31,7 +35,7 @@
 //
 //{
 //} //----- fin de nom
-
+static int descR;
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 void cptFin(int noSignal){
@@ -53,6 +57,14 @@ void Entree(TypeBarriere Parametrage){
 	sigaction(SIGUSR2,&action,NULL);
 
 
+	descR = open("fifo1",O_RDONLY);
+
+	char zone;
+	while(read(descR,&zone,sizeof(char))){
+		//cout<<"okdokdokdokdokmkdokdsoksdmkskoskdsmk"<<endl;
+	}
+
+	close(descR);
 	for(;;);
 }
 
