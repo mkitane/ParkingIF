@@ -3,12 +3,12 @@ EDL = g++
 RM = rm 
 EXE = Parking
 CLEAN = efface
-CPPFLAGS = -std=c++11 -c -Wall
+CPPFLAGS = -std=c++11 -c -Wall -fpermissive
 RMFLAGS = -f
 EDLFLAGS = -std=c++11
 LIBS = -l tp -l ncurses -l tcl
 LIBSPATH = -L/public/tp/tp-multitache
-INTERFACE = Mere.h Clavier.h Entree.h
+INTERFACE = Mere.h Clavier.h Entree.h ConfigParking.h
 REAL = $(INTERFACE:.h=.cpp)
 OBJ = $(INTERFACE:.h=.o)
 

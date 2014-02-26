@@ -58,20 +58,36 @@ void Commande(char code, unsigned int valeur)
 		close(descW);
 		exit(0);
 	}else if(code == 'P'){
-		char c = 'c';
-		Afficher(MESSAGE,"P pressed");
 		compteurVoiture++;
 		if(compteurVoiture > 999){
 			compteurVoiture=0;
 		}
+		Afficher(MESSAGE,"P pressed");
+
+		Voiture voiture;
+		voiture.numeroVoiture = compteurVoiture;
+		voiture.heureArrivee = time(NULL);
+		voiture.TypeUsager = PROF;
+
 		if(valeur == 1){
-			write(descW,&c,sizeof(c));
+			//Prof Blaise Pascal
+			write(descW,&voiture,sizeof(voiture));
 		}
 		if(valeur == 2){
-
+			//Prof Gaston Berger
 		}
 	}else if(code == 'A'){
 		Afficher(MESSAGE,"A pressed");
+		compteurVoiture++;
+		if(compteurVoiture > 999){
+			compteurVoiture=0;
+		}
+		if(valeur ==1){
+			//Autre Blaise Pascal
+		}
+		if(valeur == 2){
+			//Autre Gaston Berger
+		}
 	}else if(code == 'S'){
 		Afficher(MESSAGE,"S pressed");
 	}

@@ -56,12 +56,14 @@ void Entree(TypeBarriere Parametrage){
 	//armer sigusr2 sur cptFin;
 	sigaction(SIGUSR2,&action,NULL);
 
-
+	//Prof Blaise Pascal
 	descR = open("fifo1",O_RDONLY);
 
-	char zone;
-	while(read(descR,&zone,sizeof(char))){
-		//cout<<"okdokdokdokdokmkdokdsoksdmkskoskdsmk"<<endl;
+	Voiture voiture;
+	while(read(descR,&voiture,sizeof(Voiture))){
+		// garage voiture ajout du pid voiturier dans la list
+		pid_t voiturier=GarerVoiture(PROF_BLAISE_PASCAL);
+
 	}
 
 	close(descR);

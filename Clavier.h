@@ -19,16 +19,13 @@
 /////////////////////////////////////////////////////////////////  INCLUDE
 //--------------------------------------------------- Interfaces utilisées
 #include "/public/tp/tp-multitache/Menu.h"
+#include "ConfigParking.h"
 #include <stdlib.h>
 #include <time.h>
 //------------------------------------------------------------- Constantes
 
 //------------------------------------------------------------------ Types
-struct donneesVoiture {
-	int type;
-	int numeroVoiture;
-	time_t heureArrivee;
-};
+
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 void Clavier();

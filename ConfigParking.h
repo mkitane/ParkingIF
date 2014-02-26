@@ -1,37 +1,37 @@
 /*************************************************************************
-                           Entree  -  description
+                           Clavier  -  description
                              -------------------
-    début                : Entree
-    copyright            : (C) Entree par Entree
-    e-mail               : Entree
+    début                : Clavier
+    copyright            : (C) Clavier par Clavier
+    e-mail               : Clavier
 *************************************************************************/
 
-//---------- Interface de la tâche <Entree> (fichier Entree.h) -------
-#if ! defined ( Entree_H )
-#define Entree_H
+//---------- Interface de la tâche <Clavier> (fichier Clavier.h) -------
+#if ! defined ( ConfigParking_H )
+#define ConfigParking_H
 
 //------------------------------------------------------------------------
-// Rôle de la tâche <Entree>
+// Rôle de la tâche <Clavier>
 //
 //
 //------------------------------------------------------------------------
 
 /////////////////////////////////////////////////////////////////  INCLUDE
 //--------------------------------------------------- Interfaces utilisées
-#include "/public/tp/tp-multitache/Outils.h"
-#include "ConfigParking.h"
+#include </public/tp/tp-multitache/Outils.h>
+
+
 //------------------------------------------------------------- Constantes
 
 //------------------------------------------------------------------ Types
 
+struct Voiture {
+	TypeUsager TypeUsager;
+	int numeroVoiture;
+	time_t heureArrivee;
+};
+
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-void Entree(TypeBarriere Parametrage);
-//TODO : CHANGER LE INT PARAMETRAGE PLUTARD
-// Mode d'emploi :
-//
-// Contrat :
-//
 
-#endif // Entree_H
-
+#endif
