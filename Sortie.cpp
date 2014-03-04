@@ -20,6 +20,9 @@
 #include <unistd.h>
 //wait
 #include <sys/wait.h>
+//vector
+#include <vector>
+#include <algorithm>
 //------------------------------------------------------ Include personnel
 #include "/public/tp/tp-multitache/Outils.h"
 #include "ConfigParking.h"
@@ -30,10 +33,18 @@
 //------------------------------------------------------------------ Types
 
 //---------------------------------------------------- Variables statiques
+//Vector plutot que map car pas besoin de stocker d'autres infos
+static vector<pid_t> voituriersEnSortie;
 static int descR;
 //------------------------------------------------------ Fonctions privées
 static void handlerSortie(int noSignal){
 	if(noSignal == SIGUSR2){
+		for(vector<pid_t>::iterator itLE = voituriersEnSortie.begin(); itLE != voituriersEnSortie.end(); itLE++){
+			kill(*itLE, SIGUSR2);
+		}
+		for(vector<pid_t>::iterator itLE = voituriersEnSortie.begin(); itLE != voituriersEnSortie.end(); itLE++){
+			waitpid(*itLE,NULL,0);
+		}
 		close(descR);
 		exit(0);
 	}
@@ -74,6 +85,8 @@ static void handlerSortie(int noSignal){
 				break;
 		}
 
+		vector<pid_t>::iterator itSorti = std::find(voituriersEnSortie.begin(),voituriersEnSortie.end(),filsFini);
+		voituriersEnSortie.erase(itSorti);
 	}
 }
 //////////////////////////////////////////////////////////////////  PUBLIC
@@ -102,6 +115,10 @@ void Sortie(){
 		//Lecture sur le canal du numero de la place
 		if(read(descR,&numeroPlace,sizeof(int)) > 0){
 			pid_t voiturierSortie = SortirVoiture(numeroPlace);
+
+			//on stocke les voituriers en sortie pour pouvoir les supprimer
+			//si on appuie sur Q
+			voituriersEnSortie.push_back(voiturierSortie);
 		}
 	}
 
