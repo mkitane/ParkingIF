@@ -18,6 +18,8 @@
 //lecture pipe
 #include <sys/types.h>
 #include <unistd.h>
+//wait
+#include <sys/wait.h>
 //------------------------------------------------------ Include personnel
 #include "/public/tp/tp-multitache/Outils.h"
 #include "ConfigParking.h"
@@ -36,6 +38,43 @@ static void handlerSortie(int noSignal){
 		exit(0);
 	}
 
+	if(noSignal == SIGCHLD){
+		int status;
+		//Recuperer le fils qui a envoye le SIGCHLD
+		pid_t filsFini = wait(&status);
+
+		//Efface la bonne voiture sur lecran
+		switch(WEXITSTATUS(status))
+		{
+			case(1):
+				Effacer(ETAT_P1);
+				break;
+			case(2):
+				Effacer(ETAT_P2);
+				break;
+			case(3):
+				Effacer(ETAT_P3);
+				break;
+			case(4):
+				Effacer(ETAT_P4);
+				break;
+			case(5):
+				Effacer(ETAT_P5);
+				break;
+			case(6):
+				Effacer(ETAT_P6);
+				break;
+			case(7):
+				Effacer(ETAT_P7);
+				break;
+			case(8):
+				Effacer(ETAT_P8);
+				break;
+			default:
+				break;
+		}
+
+	}
 }
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
@@ -52,6 +91,7 @@ void Sortie(){
 
 	//armer sigusr2 sur handlerSortie;
 	sigaction(SIGUSR2,&action,NULL);
+	sigaction(SIGCHLD,&action,NULL);
 
 	//Ouverture du canal de la sortie
 	descR = open(canalSortie,O_RDONLY);
@@ -62,35 +102,6 @@ void Sortie(){
 		//Lecture sur le canal du numero de la place
 		if(read(descR,&numeroPlace,sizeof(int)) > 0){
 			pid_t voiturierSortie = SortirVoiture(numeroPlace);
-			switch(numeroPlace)
-			{
-				case(1):
-					Effacer(ETAT_P1);
-					break;
-				case(2):
-					Effacer(ETAT_P2);
-					break;
-				case(3):
-					Effacer(ETAT_P3);
-					break;
-				case(4):
-					Effacer(ETAT_P4);
-					break;
-				case(5):
-					Effacer(ETAT_P5);
-					break;
-				case(6):
-					Effacer(ETAT_P6);
-					break;
-				case(7):
-					Effacer(ETAT_P7);
-					break;
-				case(8):
-					Effacer(ETAT_P8);
-					break;
-				default:
-					break;
-			}
 		}
 	}
 
