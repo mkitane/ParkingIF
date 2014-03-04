@@ -25,7 +25,7 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-void Sortie();
+void Sortie(int pmemID);
 //TODO : CHANGER LE INT PARAMETRAGE PLUTARD
 // Mode d'emploi :
 //

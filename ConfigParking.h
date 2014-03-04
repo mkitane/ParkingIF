@@ -24,6 +24,7 @@
 //------------------------------------------------------------- Constantes
 #define TERMINALUTILISE XTERM
 #define DROITSCANAL 0660
+#define DROITSMEM 0660
 #define TEMPO 1
 
 static const char* canalProfBP = "fifo1" ;
@@ -31,14 +32,17 @@ static const char* canalSortie = "fifo4" ;
 //static const char* canalAutreBP = "fifo2" ;
 //static const char* canalGB = "fifo3" ;
 
+static const char* memoirePartagee = "memPartageeParking";
 //------------------------------------------------------------------ Types
 
-struct Voiture {
+typedef struct Voiture {
 	enum TypeUsager TypeUsager;
 	int numeroVoiture;
 	time_t heureArrivee;
-};
-
+} Voiture;
+typedef struct memStruct{
+	Voiture voituresPartagee[NB_PLACES];
+} memStruct;
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 

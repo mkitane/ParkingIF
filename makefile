@@ -3,7 +3,7 @@ EDL = g++
 RM = rm 
 EXE = Parking
 CLEAN = efface
-CPPFLAGS = -std=c++11 -c -Wall -Wextra
+CPPFLAGS = -std=c++11 -c -Wall -Wextra -Wno-unused-variable
 RMFLAGS = -f
 EDLFLAGS = -std=c++11
 LIBS = -l tp -l ncurses -l tcl

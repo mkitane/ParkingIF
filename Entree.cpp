@@ -22,6 +22,10 @@
 #include <map>
 #include <stdio.h>
 #include <string.h>
+
+
+#include <sys/ipc.h>
+#include <sys/shm.h>
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
 
@@ -41,6 +45,8 @@
 //} //----- fin de nom
 static int descR;
 static map<pid_t,Voiture> mapVoiture;
+static int memID;
+
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 static void handlerEntree(int noSignal){
@@ -78,7 +84,9 @@ static void handlerEntree(int noSignal){
 
 
 		//Ecrire la voiture sur la mémoire partagée
-		//TODO !!
+		memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
+		a->voituresPartagee[WEXITSTATUS(status)-1] = v ;
+		shmdt(a);
 
 		//Supprimer la bonne voiture de la map des voitures en train de stationner
 		mapVoiture.erase(itLE);
@@ -86,7 +94,9 @@ static void handlerEntree(int noSignal){
 	}
 }
 
-void Entree(TypeBarriere Parametrage){
+void Entree(TypeBarriere Parametrage,int pmemID){
+	memID = pmemID;
+
 	//Installation du handler
 	struct sigaction action;
 

@@ -23,6 +23,11 @@
 //vector
 #include <vector>
 #include <algorithm>
+
+
+//memoire
+#include <sys/ipc.h>
+#include <sys/shm.h>
 //------------------------------------------------------ Include personnel
 #include "/public/tp/tp-multitache/Outils.h"
 #include "ConfigParking.h"
@@ -36,6 +41,7 @@
 //Vector plutot que map car pas besoin de stocker d'autres infos
 static vector<pid_t> voituriersEnSortie;
 static int descR;
+static int memID;
 //------------------------------------------------------ Fonctions privées
 static void handlerSortie(int noSignal){
 	if(noSignal == SIGUSR2){
@@ -85,6 +91,14 @@ static void handlerSortie(int noSignal){
 				break;
 		}
 
+
+		//Recuperer la voiture sur la mémoire partagée
+		memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
+		Voiture v = a->voituresPartagee[WEXITSTATUS(status)-1] ;
+		shmdt(a);
+
+		AfficherSortie(v.TypeUsager,v.numeroVoiture,v.heureArrivee, time(NULL));
+
 		vector<pid_t>::iterator itSorti = std::find(voituriersEnSortie.begin(),voituriersEnSortie.end(),filsFini);
 		voituriersEnSortie.erase(itSorti);
 	}
@@ -93,7 +107,10 @@ static void handlerSortie(int noSignal){
 //---------------------------------------------------- Fonctions publiques
 
 
-void Sortie(){
+void Sortie(int pmemID){
+	memID = pmemID;
+
+
 	//Installation du handler
 	struct sigaction action;
 

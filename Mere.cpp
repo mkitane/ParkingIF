@@ -17,6 +17,10 @@
 #include <signal.h>
 #include <sys/stat.h>
 #include <iostream>
+
+
+#include <sys/ipc.h>
+#include <sys/shm.h>
 //------------------------------------------------------ Include personnel
 #include "Mere.h"
 #include "Clavier.h"
@@ -44,6 +48,7 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
+static int memID;
 
 int main (void)
 //Algorithme :
@@ -70,6 +75,23 @@ int main (void)
 	}
 
 
+	//Creation de la memoire partagee
+	key_t memKey = ftok(memoirePartagee,0);
+	memID = shmget(memKey, sizeof(memStruct), IPC_CREAT | IPC_EXCL | DROITSMEM);
+
+	if(memID == -1){
+		cerr << "erreur creation memoire Partagee" << endl;
+		return -1;
+	}
+
+	//Initialisation de la memoire partagee
+	memStruct *a = (memStruct *) shmat(memID, NULL, 0);
+	for(int i=0; i<(int)NB_PLACES ; i++){
+		a->voituresPartagee[i] = {AUCUN, 0,0};
+	}
+	shmdt(a);
+
+
 	InitialiserApplication(TERMINALUTILISE);
 
 
@@ -81,11 +103,11 @@ int main (void)
 		Clavier();
 	}else if( (noEntreeUn = fork() ) ==0 ){
 		/*Code du fils */
-		Entree(PROF_BLAISE_PASCAL);
+		Entree(PROF_BLAISE_PASCAL,memID);
 
 	}else if( (noSortie = fork()) == 0 ){
 		/*Code du fils*/
-		Sortie();
+		Sortie(memID);
 
 	}else{
 		/*Code du pere */
@@ -110,6 +132,10 @@ int main (void)
 		//fermeture des canaux de communication
 		unlink(canalProfBP);
 		unlink(canalSortie);
+
+		//Suppression memoire partagee
+		shmctl(memID, IPC_RMID,0);
+
 
 		TerminerApplication();
 		exit(0);
