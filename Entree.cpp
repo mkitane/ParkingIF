@@ -43,7 +43,7 @@ static int descR;
 static map<pid_t,Voiture> mapVoiture;
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-void handlerEntree(int noSignal){
+static void handlerEntree(int noSignal){
 	if(noSignal == SIGUSR2){
 
 		//TODO: A REGLER : Voiturier ne quitte pas directement

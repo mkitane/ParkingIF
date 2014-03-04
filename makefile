@@ -8,7 +8,7 @@ RMFLAGS = -f
 EDLFLAGS = -std=c++11
 LIBS = -l tp -l ncurses -l tcl
 LIBSPATH = -L/public/tp/tp-multitache
-INTERFACE = Mere.h Clavier.h Entree.h ConfigParking.h
+INTERFACE = Mere.h Clavier.h Entree.h Sortie.h ConfigParking.h
 REAL = $(INTERFACE:.h=.cpp)
 OBJ = $(INTERFACE:.h=.o)
 

@@ -21,6 +21,7 @@
 #include "Mere.h"
 #include "Clavier.h"
 #include "Entree.h"
+#include "Sortie.h"
 #include "/public/tp/tp-multitache/Outils.h"
 #include "/public/tp/tp-multitache/Heure.h"
 ///////////////////////////////////////////////////////////////////  PRIVE
@@ -51,6 +52,7 @@ int main (void)
 	pid_t noClavier;
 	pid_t noHeure;
 	pid_t noEntreeUn;
+	pid_t noSortie;
 	//pid_t noEntreeDeux;
 	//pid_t noEntreeTrois;
 
@@ -62,7 +64,10 @@ int main (void)
 		return -1 ;
 	}
 
-
+	if(mkfifo(canalSortie,DROITSCANAL) == -1){
+		cerr<< "erreur creation du canal entre sortie et clavier" << endl;
+		return -1 ;
+	}
 
 
 	InitialiserApplication(TERMINALUTILISE);
@@ -71,13 +76,16 @@ int main (void)
 	noHeure = ActiverHeure();
 
 
-	if( (noClavier = fork()) == 0)
-	{
+	if( (noClavier = fork() ) == 0 ){
 		/*Code du fils */
 		Clavier();
-	}else if((noEntreeUn = fork()) ==0){
+	}else if( (noEntreeUn = fork() ) ==0 ){
 		/*Code du fils */
 		Entree(PROF_BLAISE_PASCAL);
+
+	}else if( (noSortie = fork()) == 0 ){
+		/*Code du fils*/
+		Sortie();
 
 	}else{
 		/*Code du pere */
@@ -92,16 +100,16 @@ int main (void)
 		//Demande de fin avec envoi de SIGUSR2
 		kill(noHeure, SIGUSR2);
 		kill(noEntreeUn,SIGUSR2);
-
+		kill(noSortie,SIGUSR2);
 
 		//attente de fin des processus fils
 		waitpid(noHeure, NULL,0);
 		waitpid(noEntreeUn,NULL,0);
-
+		waitpid(noSortie,NULL,0);
 
 		//fermeture des canaux de communication
 		unlink(canalProfBP);
-
+		unlink(canalSortie);
 
 		TerminerApplication();
 		exit(0);

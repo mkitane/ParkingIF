@@ -38,6 +38,7 @@
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 static int descW ;
+static int descSortieW;
 static int compteurVoiture = 0;
 void Clavier()
 // Algorithme :
@@ -45,6 +46,7 @@ void Clavier()
 {
 	//Ouverture Canal
 	descW = open(canalProfBP,O_WRONLY);
+	descSortieW = open(canalSortie, O_WRONLY);
 
 	for(;;){
 		Menu();
@@ -91,5 +93,7 @@ void Commande(char code, unsigned int valeur)
 		}
 	}else if(code == 'S'){
 		Afficher(MESSAGE,"S pressed");
+		write(descSortieW,&valeur,sizeof(int));
+
 	}
 }

@@ -1,45 +1,36 @@
 /*************************************************************************
-                           Clavier  -  description
+                           Sortie  -  description
                              -------------------
-    début                : Clavier
-    copyright            : (C) Clavier par Clavier
-    e-mail               : Clavier
+    début                : Sortie
+    copyright            : (C) Sortie par Sortie
+    e-mail               : Sortie
 *************************************************************************/
 
-//---------- Interface de la tâche <Clavier> (fichier Clavier.h) -------
-#if ! defined ( ConfigParking_H )
-#define ConfigParking_H
+//---------- Interface de la tâche <Sortie> (fichier Sortie.h) -------
+#if ! defined ( Sortie_H )
+#define Sortie_H
 
 //------------------------------------------------------------------------
-// Rôle de la tâche <Clavier>
+// Rôle de la tâche <Sortie>
 //
 //
 //------------------------------------------------------------------------
 
 /////////////////////////////////////////////////////////////////  INCLUDE
 //--------------------------------------------------- Interfaces utilisées
-#include </public/tp/tp-multitache/Outils.h>
-
 
 //------------------------------------------------------------- Constantes
-#define TERMINALUTILISE XTERM
-#define DROITSCANAL 0660
-#define TEMPO 1
-
-static const char* canalProfBP = "fifo1" ;
-static const char* canalSortie = "fifo4" ;
-//static const char* canalAutreBP = "fifo2" ;
-//static const char* canalGB = "fifo3" ;
 
 //------------------------------------------------------------------ Types
 
-struct Voiture {
-	enum TypeUsager TypeUsager;
-	int numeroVoiture;
-	time_t heureArrivee;
-};
-
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
+void Sortie();
+//TODO : CHANGER LE INT PARAMETRAGE PLUTARD
+// Mode d'emploi :
+//
+// Contrat :
+//
 
-#endif
+#endif // Sortie_H
+
