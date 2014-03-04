@@ -43,7 +43,8 @@ void Clavier()
 // Algorithme :
 //
 {
-	descW = open("fifo1",O_WRONLY);
+	//Ouverture Canal
+	descW = open(canalProfBP,O_WRONLY);
 
 	for(;;){
 		Menu();

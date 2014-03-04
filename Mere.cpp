@@ -51,8 +51,8 @@ int main (void)
 	pid_t noClavier;
 	pid_t noHeure;
 	pid_t noEntreeUn;
-	pid_t noEntreeDeux;
-	pid_t noEntreeTrois;
+	//pid_t noEntreeDeux;
+	//pid_t noEntreeTrois;
 
 
 	//Mise en place du canal de communication entre la mere et le clavier

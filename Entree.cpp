@@ -45,6 +45,8 @@ static map<pid_t,Voiture> mapVoiture;
 //---------------------------------------------------- Fonctions publiques
 void handlerEntree(int noSignal){
 	if(noSignal == SIGUSR2){
+
+		//TODO: A REGLER : Voiturier ne quitte pas directement
 		map<pid_t,Voiture>::iterator it;
 		for(it==mapVoiture.begin(); it!= mapVoiture.end() ; it++){
 			kill(it->first,SIGUSR2);
@@ -75,6 +77,12 @@ void handlerEntree(int noSignal){
 		AfficherPlace(WEXITSTATUS(status),v.TypeUsager,v.numeroVoiture,v.heureArrivee);
 
 
+		//Ecrire la voiture sur la mémoire partagée
+		//TODO !!
+
+		//Supprimer la bonne voiture de la map des voitures en train de stationner
+		mapVoiture.erase(itLE);
+
 	}
 }
 
@@ -90,21 +98,39 @@ void Entree(TypeBarriere Parametrage){
 	//armer sigusr2 sur handlerEntree;
 	sigaction(SIGUSR2,&action,NULL);
 	sigaction(SIGCHLD,&action,NULL);
-	//Prof Blaise Pascal
-	descR = open(canalProfBP,O_RDONLY);
 
-	Voiture voiture;
+	switch(Parametrage)
+	{
+		case(PROF_BLAISE_PASCAL):
+			//Prof Blaise Pascal
+			descR = open(canalProfBP,O_RDONLY);
+			break;
+		case(AUTRE_BLAISE_PASCAL):
+			//descR = open(canalAutreBP,O_RDONLY);
+			break;
+		case(ENTREE_GASTON_BERGER):
+			//descR = open(canalGB,O_RDONLY);
+			break;
+		default:
+			break;
+	}
 
 	for(;;){
+		Voiture voiture;
+
 		if(read(descR,&voiture,sizeof(Voiture)) > 0){
 
 			// garage voiture ajout du pid voiturier dans la list
 			DessinerVoitureBarriere(PROF_BLAISE_PASCAL,voiture.TypeUsager);
 			pid_t voiturier=GarerVoiture(PROF_BLAISE_PASCAL);
 
-			mapVoiture.insert(pair<pid_t,Voiture>(voiturier,voiture));
-			//sleep 1s
-			sleep(TEMPO);
+			if(voiturier != -1){
+				mapVoiture.insert(pair<pid_t,Voiture>(voiturier,voiture));
+				//sleep 1s
+				sleep(TEMPO);
+			}else{
+				//Place indisponible
+			}
 		}
 	}
 

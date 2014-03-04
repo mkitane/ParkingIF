@@ -27,13 +27,13 @@
 #define TEMPO 1
 
 static const char* canalProfBP = "fifo1" ;
-static const char* canalAutreBP = "fifo2" ;
-static const char* canalGB = "fifo3" ;
+//static const char* canalAutreBP = "fifo2" ;
+//static const char* canalGB = "fifo3" ;
 
 //------------------------------------------------------------------ Types
 
 struct Voiture {
-	TypeUsager TypeUsager;
+	enum TypeUsager TypeUsager;
 	int numeroVoiture;
 	time_t heureArrivee;
 };
