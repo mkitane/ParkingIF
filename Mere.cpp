@@ -25,8 +25,7 @@
 #include "/public/tp/tp-multitache/Heure.h"
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
-#define TERMINALUTILISE XTERM
-#define DROITSCANAL 0660
+
 //------------------------------------------------------------------ Types
 
 //---------------------------------------------------- Variables statiques
@@ -58,7 +57,7 @@ int main (void)
 
 	//Mise en place du canal de communication entre la mere et le clavier
 	//Creation des differents canaux de communication nommes
-	if(mkfifo("fifo1",DROITSCANAL) == -1){
+	if(mkfifo(canalProfBP,DROITSCANAL) == -1){
 		cerr<< "erreur creation du canal entre entree et clavier" << endl;
 		return -1 ;
 	}
@@ -101,7 +100,7 @@ int main (void)
 
 
 		//fermeture des canaux de communication
-		unlink("fifo1");
+		unlink(canalProfBP);
 
 
 		TerminerApplication();

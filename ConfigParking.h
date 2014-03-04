@@ -22,6 +22,13 @@
 
 
 //------------------------------------------------------------- Constantes
+#define TERMINALUTILISE XTERM
+#define DROITSCANAL 0660
+#define TEMPO 1
+
+static const char* canalProfBP = "fifo1" ;
+static const char* canalAutreBP = "fifo2" ;
+static const char* canalGB = "fifo3" ;
 
 //------------------------------------------------------------------ Types
 
