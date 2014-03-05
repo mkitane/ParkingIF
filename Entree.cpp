@@ -54,10 +54,10 @@ static void handlerEntree(int noSignal){
 
 		//TODO: A REGLER : Voiturier ne quitte pas directement
 		map<pid_t,Voiture>::iterator it;
-		for(it==mapVoiture.begin(); it!= mapVoiture.end() ; it++){
+		for(it=mapVoiture.begin(); it!= mapVoiture.end() ; it++){
 			kill(it->first,SIGUSR2);
 		}
-		for(it==mapVoiture.begin(); it!= mapVoiture.end() ; it++){
+		for(it=mapVoiture.begin(); it!= mapVoiture.end() ; it++){
 			waitpid(it->first,NULL,0);
 		}
 

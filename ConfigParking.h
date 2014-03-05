@@ -32,7 +32,7 @@ static const char* canalSortie = "fifo4" ;
 //static const char* canalAutreBP = "fifo2" ;
 //static const char* canalGB = "fifo3" ;
 
-static const char* memoirePartagee = "memPartageeParking";
+static const char* memoirePartagee = "Parking";
 //------------------------------------------------------------------ Types
 
 typedef struct Voiture {
