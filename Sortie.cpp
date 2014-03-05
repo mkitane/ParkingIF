@@ -28,6 +28,7 @@
 //memoire
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <sys/sem.h>
 //------------------------------------------------------ Include personnel
 #include "/public/tp/tp-multitache/Outils.h"
 #include "ConfigParking.h"
@@ -42,6 +43,7 @@
 static vector<pid_t> voituriersEnSortie;
 static int descR;
 static int memID;
+static int semID;
 //------------------------------------------------------ Fonctions privées
 static void handlerSortie(int noSignal){
 	if(noSignal == SIGUSR2){
@@ -101,15 +103,19 @@ static void handlerSortie(int noSignal){
 
 		vector<pid_t>::iterator itSorti = std::find(voituriersEnSortie.begin(),voituriersEnSortie.end(),filsFini);
 		voituriersEnSortie.erase(itSorti);
+
+
+		struct sembuf vOp = {SemaphoreCompteurPlaces,1,0};
+		semop(semID,&vOp,1);
 	}
 }
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 
 
-void Sortie(int pmemID){
+void Sortie(int pmemID , int psemID){
 	memID = pmemID;
-
+	semID = psemID;
 
 	//Installation du handler
 	struct sigaction action;

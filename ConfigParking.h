@@ -25,10 +25,12 @@
 #define TERMINALUTILISE XTERM
 #define DROITSCANAL 0660
 #define DROITSMEM 0660
-#define TEMPO 1
 
 static const char* canalProfBP = "fifo1" ;
 static const char* canalSortie = "fifo4" ;
+
+const int NB_SEM = 4;
+const int TEMPO = 1 ;
 //static const char* canalAutreBP = "fifo2" ;
 //static const char* canalGB = "fifo3" ;
 
@@ -40,9 +42,23 @@ typedef struct Voiture {
 	int numeroVoiture;
 	time_t heureArrivee;
 } Voiture;
+
 typedef struct memStruct{
 	Voiture voituresPartagee[NB_PLACES];
+
+	Voiture requetePorteBPPROF;
+	Voiture requetePorteBPAUTRE;
+	Voiture requetePorteGB;
 } memStruct;
+
+
+typedef enum Semaphore
+{
+	SemaphoreCompteurPlaces = 0,
+	MutexPorteBPPROF = 1,
+	MutexPorteBPAUTRE = 2,
+	MutexPorteGB = 3
+}Semaphore;
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 

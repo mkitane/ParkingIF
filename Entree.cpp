@@ -26,6 +26,7 @@
 
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <sys/sem.h>
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
 
@@ -46,7 +47,7 @@
 static int descR;
 static map<pid_t,Voiture> mapVoiture;
 static int memID;
-
+static int semID;
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 static void handlerEntree(int noSignal){
@@ -94,8 +95,9 @@ static void handlerEntree(int noSignal){
 	}
 }
 
-void Entree(TypeBarriere Parametrage,int pmemID){
+void Entree(TypeBarriere Parametrage,int pmemID, int psemID){
 	memID = pmemID;
+	semID = psemID;
 
 	//Installation du handler
 	struct sigaction action;
@@ -130,16 +132,27 @@ void Entree(TypeBarriere Parametrage,int pmemID){
 
 		if(read(descR,&voiture,sizeof(Voiture)) > 0){
 
-			// garage voiture ajout du pid voiturier dans la list
-			DessinerVoitureBarriere(PROF_BLAISE_PASCAL,voiture.TypeUsager);
-			pid_t voiturier=GarerVoiture(PROF_BLAISE_PASCAL);
 
-			if(voiturier != -1){
+			if( semctl(semID,SemaphoreCompteurPlaces,GETVAL,0) > 0){
+
+				//On reduit de 1 le semaphore
+				//TODO: Ne faut-il pas garantir l'integrite de ttes ces operations? Tous en mm tps
+				struct sembuf pOp = {SemaphoreCompteurPlaces,-1,0};
+				semop(semID,&pOp,1);
+
+				cerr << "Valeur du semaphore : " <<semctl(semID,SemaphoreCompteurPlaces,GETVAL,0) <<endl;
+
+
+				// garage voiture ajout du pid voiturier dans la list
+				DessinerVoitureBarriere(Parametrage,voiture.TypeUsager);
+				pid_t voiturier=GarerVoiture(Parametrage);
+
 				mapVoiture.insert(pair<pid_t,Voiture>(voiturier,voiture));
 				//sleep 1s
 				sleep(TEMPO);
+
 			}else{
-				//Place indisponible
+				//On place en liste d'attente !
 			}
 		}
 	}

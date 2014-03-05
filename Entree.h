@@ -26,7 +26,7 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-void Entree(TypeBarriere Parametrage, int pmemID);
+void Entree(TypeBarriere Parametrage, int pmemID, int psemID);
 //TODO : CHANGER LE INT PARAMETRAGE PLUTARD
 // Mode d'emploi :
 //

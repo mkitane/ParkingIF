@@ -21,6 +21,8 @@
 
 #include <sys/ipc.h>
 #include <sys/shm.h>
+
+#include <sys/sem.h>
 //------------------------------------------------------ Include personnel
 #include "Mere.h"
 #include "Clavier.h"
@@ -49,7 +51,7 @@
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 static int memID;
-
+static int semID;
 int main (void)
 //Algorithme :
 {
@@ -76,8 +78,7 @@ int main (void)
 
 
 	//Creation de la memoire partagee
-	key_t memKey = ftok(memoirePartagee,0);
-	memID = shmget(memKey, sizeof(memStruct), IPC_CREAT | IPC_EXCL | DROITSMEM);
+	memID = shmget(ftok(memoirePartagee,0), sizeof(memStruct), IPC_CREAT | IPC_EXCL | DROITSMEM);
 
 	if(memID == -1){
 		cerr << "erreur creation memoire Partagee" << endl;
@@ -89,7 +90,27 @@ int main (void)
 	for(int i=0; i<(int)NB_PLACES ; i++){
 		a->voituresPartagee[i] = {AUCUN, 0,0};
 	}
+	a->requetePorteBPAUTRE = {AUCUN, 0,0};
+	a->requetePorteBPPROF = {AUCUN, 0,0};
+	a->requetePorteGB = {AUCUN, 0,0};
 	shmdt(a);
+
+	//Creation des semaphores
+	semID = semget(ftok(memoirePartagee,1), NB_SEM , IPC_CREAT | IPC_EXCL | DROITSMEM);
+
+	if(semID == -1){
+		cerr << "erreur creation semaphore" << endl;
+		return -1;
+	}
+
+	//Initialisation des semaphores
+		//Initialisation du semaphore compteur de places
+	semctl(semID,SemaphoreCompteurPlaces,SETVAL,8);
+		//Initialisation des mutexs
+	semctl(semID,MutexPorteBPPROF,SETVAL,1);
+	semctl(semID,MutexPorteBPAUTRE,SETVAL,1);
+	semctl(semID,MutexPorteGB,SETVAL,1);
+
 
 
 	InitialiserApplication(TERMINALUTILISE);
@@ -97,17 +118,16 @@ int main (void)
 
 	noHeure = ActiverHeure();
 
-
 	if( (noClavier = fork() ) == 0 ){
 		/*Code du fils */
 		Clavier();
 	}else if( (noEntreeUn = fork() ) ==0 ){
 		/*Code du fils */
-		Entree(PROF_BLAISE_PASCAL,memID);
+		Entree(PROF_BLAISE_PASCAL,memID,semID);
 
 	}else if( (noSortie = fork()) == 0 ){
 		/*Code du fils*/
-		Sortie(memID);
+		Sortie(memID,semID);
 
 	}else{
 		/*Code du pere */
@@ -135,6 +155,9 @@ int main (void)
 
 		//Suppression memoire partagee
 		shmctl(memID, IPC_RMID,0);
+
+		//Suppression du semaphore
+		semctl(semID, IPC_RMID, 0);
 
 
 		TerminerApplication();
