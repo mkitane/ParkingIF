@@ -37,15 +37,20 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-static int descW ;
+static int descProfBPW ;
 static int descSortieW;
+static int descGBW ;
+static int descAutreBPW ;
+
 static int compteurVoiture = 0;
 void Clavier()
 // Algorithme :
 //
 {
 	//Ouverture Canal
-	descW = open(canalProfBP,O_WRONLY);
+	descProfBPW = open(canalProfBP,O_WRONLY);
+	descAutreBPW  = open(canalAutreBP,O_WRONLY);
+	descGBW = open(canalGB,O_WRONLY);
 	descSortieW = open(canalSortie, O_WRONLY);
 
 	for(;;){
@@ -58,7 +63,11 @@ void Commande(char code, unsigned int valeur)
 //
 {
 	if(code == 'Q'){
-		close(descW);
+		close(descProfBPW);
+		close(descAutreBPW);
+		close(descGBW);
+		close(descSortieW);
+
 		exit(0);
 	}else if(code == 'P'){
 		compteurVoiture++;
@@ -74,10 +83,11 @@ void Commande(char code, unsigned int valeur)
 
 		if(valeur == 1){
 			//Prof Blaise Pascal
-			write(descW,&voiture,sizeof(voiture));
+			write(descProfBPW,&voiture,sizeof(voiture));
 		}
 		if(valeur == 2){
 			//Prof Gaston Berger
+			write(descGBW,&voiture,sizeof(voiture));
 		}
 	}else if(code == 'A'){
 		Afficher(MESSAGE,"A pressed");
@@ -85,15 +95,24 @@ void Commande(char code, unsigned int valeur)
 		if(compteurVoiture > 999){
 			compteurVoiture=0;
 		}
+
+
+		Voiture voiture;
+		voiture.numeroVoiture = compteurVoiture;
+		voiture.heureArrivee = time(NULL);
+		voiture.TypeUsager = AUTRE;
+
+
 		if(valeur ==1){
 			//Autre Blaise Pascal
+			write(descAutreBPW,&voiture,sizeof(voiture));
 		}
 		if(valeur == 2){
 			//Autre Gaston Berger
+			write(descGBW,&voiture,sizeof(voiture));
 		}
 	}else if(code == 'S'){
 		Afficher(MESSAGE,"S pressed");
 		write(descSortieW,&valeur,sizeof(int));
-
 	}
 }

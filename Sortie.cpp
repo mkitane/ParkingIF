@@ -110,9 +110,9 @@ static int gererPriorite(int memID){
 	}
 
 	memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
-	requetePorteBPPROF = a->requetePorteBPPROF;
-	requetePorteBPAUTRE = a->requetePorteBPAUTRE;
-	requetePorteGB = a->requetePorteGB;
+	requetePorteBPPROF = a->requetes[(int)PROF_BLAISE_PASCAL -1];
+	requetePorteBPAUTRE = a->requetes[(int)AUTRE_BLAISE_PASCAL -1];
+	requetePorteGB = a->requetes[(int)ENTREE_GASTON_BERGER -1];
 	shmdt(a);
 	//Lever mutex
 	{
@@ -184,19 +184,9 @@ static void handlerSortie(int noSignal){
 			while(semop(semID,&pOp,1)==-1 && errno==EINTR);
 			}
 			memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
-			if(prio==1){
-				//On efface la requete correspondante dans la mem partagee
-				a->requetePorteBPPROF = {AUCUN, 0,0};
-			}
-			if(prio==2){
-				//On efface la requete correspondante dans la mem partagee
-				a->requetePorteBPAUTRE = {AUCUN, 0,0};
-			}
-			if(prio==3){
-				//On efface la requete correspondante dans la mem partagee
-				a->requetePorteGB = {AUCUN, 0,0};
-			}
+			a->requetes[prio-1] = {AUCUN, 0,0};
 			shmdt(a);
+
 			{
 			//On relache le mutex
 			struct sembuf vOp = {MutexMP,1,0};

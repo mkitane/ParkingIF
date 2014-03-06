@@ -133,10 +133,10 @@ void Entree(TypeBarriere Parametrage,int pmemID, int psemID){
 			descR = open(canalProfBP,O_RDONLY);
 			break;
 		case(AUTRE_BLAISE_PASCAL):
-			//descR = open(canalAutreBP,O_RDONLY);
+			descR = open(canalAutreBP,O_RDONLY);
 			break;
 		case(ENTREE_GASTON_BERGER):
-			//descR = open(canalGB,O_RDONLY);
+			descR = open(canalGB,O_RDONLY);
 			break;
 		default:
 			break;
@@ -162,7 +162,7 @@ void Entree(TypeBarriere Parametrage,int pmemID, int psemID){
 				}
 				//Ecrire la voiture sur la mémoire partagée
 				memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
-				a->requetePorteBPPROF =  voiture ;
+				a->requetes[Parametrage-1] =  voiture ;
 				shmdt(a);
 
 				{
@@ -174,7 +174,7 @@ void Entree(TypeBarriere Parametrage,int pmemID, int psemID){
 
 				cerr << "On lance le semaphore bloquant" << endl;
 
-				struct sembuf pOp = {SynchroPorteBPPROF,-1,0};
+				struct sembuf pOp = {Parametrage,-1,0};
 				//Le processus reçoit un signal à intercepter, la valeur de semncnt est décrémentée et semop()
 				//échoue avec errno contenant le code d'erreur EINTR.
 				while(semop(semID,&pOp,1)==-1 && errno==EINTR);

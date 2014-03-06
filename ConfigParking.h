@@ -28,12 +28,13 @@
 #define DROITSEMAPHORE 0666
 
 static const char* canalProfBP = "fifo1" ;
+static const char* canalAutreBP = "fifo2" ;
+static const char* canalGB = "fifo3" ;
 static const char* canalSortie = "fifo4" ;
 
 const int NB_SEM = 5;
 const int TEMPO = 1 ;
-//static const char* canalAutreBP = "fifo2" ;
-//static const char* canalGB = "fifo3" ;
+
 
 static const char* memoirePartagee = "Parking";
 //------------------------------------------------------------------ Types
@@ -47,9 +48,7 @@ typedef struct Voiture {
 typedef struct memStruct{
 	Voiture voituresPartagee[NB_PLACES];
 
-	Voiture requetePorteBPPROF;
-	Voiture requetePorteBPAUTRE;
-	Voiture requetePorteGB;
+	Voiture requetes[NB_BARRIERES_ENTREE];
 } memStruct;
 
 

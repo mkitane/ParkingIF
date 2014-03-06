@@ -61,9 +61,10 @@ int main (void)
 	pid_t noClavier;
 	pid_t noHeure;
 	pid_t noEntreeUn;
+	pid_t noEntreeDeux;
+	pid_t noEntreeTrois;
 	pid_t noSortie;
-	//pid_t noEntreeDeux;
-	//pid_t noEntreeTrois;
+
 
 
 	//Mise en place du canal de communication entre la mere et le clavier
@@ -72,7 +73,14 @@ int main (void)
 		cerr<< "erreur creation du canal entre entree et clavier" << endl;
 		return -1 ;
 	}
-
+	if(mkfifo(canalAutreBP,DROITSCANAL) == -1){
+		cerr<< "erreur creation du canal entre entree et clavier" << endl;
+		return -1 ;
+	}
+	if(mkfifo(canalGB,DROITSCANAL) == -1){
+		cerr<< "erreur creation du canal entre entree et clavier" << endl;
+		return -1 ;
+	}
 	if(mkfifo(canalSortie,DROITSCANAL) == -1){
 		cerr<< "erreur creation du canal entre sortie et clavier" << endl;
 		return -1 ;
@@ -92,9 +100,9 @@ int main (void)
 	for(int i=0; i<(int)NB_PLACES ; i++){
 		a->voituresPartagee[i] = {AUCUN, 0,0};
 	}
-	a->requetePorteBPAUTRE = {AUCUN, 0,0};
-	a->requetePorteBPPROF = {AUCUN, 0,0};
-	a->requetePorteGB = {AUCUN, 0,0};
+	for(int i=0; i<(int)NB_BARRIERES_ENTREE ; i++){
+		a->requetes[i] = {AUCUN, 0,0};
+	}
 	shmdt(a);
 
 	//Creation des semaphores
@@ -124,9 +132,17 @@ int main (void)
 	if( (noClavier = fork() ) == 0 ){
 		/*Code du fils */
 		Clavier();
-	}else if( (noEntreeUn = fork() ) ==0 ){
+	}else if( (noEntreeUn = fork() ) == 0 ){
 		/*Code du fils */
 		Entree(PROF_BLAISE_PASCAL,memID,semID);
+
+	}else if( (noEntreeDeux = fork() ) == 0 ){
+		/*Code du fils */
+		Entree(AUTRE_BLAISE_PASCAL,memID,semID);
+
+	}else if( (noEntreeTrois = fork() ) == 0 ){
+		/*Code du fils */
+		Entree(ENTREE_GASTON_BERGER,memID,semID);
 
 	}else if( (noSortie = fork()) == 0 ){
 		/*Code du fils*/
@@ -145,11 +161,17 @@ int main (void)
 		//Demande de fin avec envoi de SIGUSR2
 		kill(noHeure, SIGUSR2);
 		kill(noEntreeUn,SIGUSR2);
+		kill(noEntreeDeux,SIGUSR2);
+		kill(noEntreeTrois,SIGUSR2);
+
 		kill(noSortie,SIGUSR2);
 
 		//attente de fin des processus fils
 		waitpid(noHeure, NULL,0);
 		waitpid(noEntreeUn,NULL,0);
+		waitpid(noEntreeDeux,NULL,0);
+		waitpid(noEntreeTrois,NULL,0);
+
 		waitpid(noSortie,NULL,0);
 
 		//fermeture des canaux de communication
