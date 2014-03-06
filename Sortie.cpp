@@ -31,6 +31,8 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/sem.h>
+
+#include <errno.h>
 //------------------------------------------------------ Include personnel
 #include "/public/tp/tp-multitache/Outils.h"
 #include "ConfigParking.h"
@@ -101,12 +103,23 @@ static int gererPriorite(int memID){
 	Voiture requetePorteGB;
 
 	//Baisser Mutex Pour lecture sur memoire
+	{
+	//On met en place le mutex
+	struct sembuf pOp = {MutexMP,-1,0};
+	while(semop(semID,&pOp,1)==-1 && errno==EINTR);
+	}
+
 	memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
 	requetePorteBPPROF = a->requetePorteBPPROF;
 	requetePorteBPAUTRE = a->requetePorteBPAUTRE;
 	requetePorteGB = a->requetePorteGB;
 	shmdt(a);
 	//Lever mutex
+	{
+	//On relache le mutex
+	struct sembuf vOp = {MutexMP,1,0};
+	semop(semID,&vOp,1);
+	}
 
 	//Gestion Priorite
 	//Rappel Prof tjrs Prioritaire Ensuite Temps
@@ -135,9 +148,20 @@ static void handlerSortie(int noSignal){
 
 
 		//Recuperer la voiture sur la mémoire partagée
+		{
+		//On met en place le mutex
+		struct sembuf pOp = {MutexMP,-1,0};
+		while(semop(semID,&pOp,1)==-1 && errno==EINTR);
+		}
 		memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
 		Voiture v = a->voituresPartagee[WEXITSTATUS(status)-1] ;
 		shmdt(a);
+		{
+		//On relache le mutex
+		struct sembuf vOp = {MutexMP,1,0};
+		semop(semID,&vOp,1);
+		}
+
 
 		AfficherSortie(v.TypeUsager,v.numeroVoiture,v.heureArrivee, time(NULL));
 
@@ -154,6 +178,11 @@ static void handlerSortie(int noSignal){
 			//Si une requete est en attente, on la satisfait!
 
 
+			{
+			//On met en place le mutex
+			struct sembuf pOp = {MutexMP,-1,0};
+			while(semop(semID,&pOp,1)==-1 && errno==EINTR);
+			}
 			memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
 			if(prio==1){
 				//On efface la requete correspondante dans la mem partagee
@@ -168,6 +197,11 @@ static void handlerSortie(int noSignal){
 				a->requetePorteGB = {AUCUN, 0,0};
 			}
 			shmdt(a);
+			{
+			//On relache le mutex
+			struct sembuf vOp = {MutexMP,1,0};
+			semop(semID,&vOp,1);
+			}
 
 
 			cerr<<"On gere une priorite" << endl;

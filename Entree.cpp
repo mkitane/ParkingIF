@@ -84,10 +84,25 @@ static void handlerEntree(int noSignal){
 		AfficherPlace(WEXITSTATUS(status),v.TypeUsager,v.numeroVoiture,v.heureArrivee);
 
 
+
+		{
+		//On met en place le mutex
+		struct sembuf pOp = {MutexMP,-1,0};
+		while(semop(semID,&pOp,1)==-1 && errno==EINTR);
+		}
+
 		//Ecrire la voiture sur la mémoire partagée
 		memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
 		a->voituresPartagee[WEXITSTATUS(status)-1] = v ;
 		shmdt(a);
+
+		{
+		//On relache le mutex
+		struct sembuf vOp = {MutexMP,1,0};
+		semop(semID,&vOp,1);
+		}
+
+
 
 		//Supprimer la bonne voiture de la map des voitures en train de stationner
 		mapVoiture.erase(itLE);
@@ -140,10 +155,22 @@ void Entree(TypeBarriere Parametrage,int pmemID, int psemID){
 
 
 				//On ecrit dans la mémoire partagée que l'on a une requete !
+				{
+				//On met en place le mutex
+				struct sembuf pOp = {MutexMP,-1,0};
+				while(semop(semID,&pOp,1)==-1 && errno==EINTR);
+				}
 				//Ecrire la voiture sur la mémoire partagée
 				memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
 				a->requetePorteBPPROF =  voiture ;
 				shmdt(a);
+
+				{
+				//On relache le mutex
+				struct sembuf vOp = {MutexMP,1,0};
+				semop(semID,&vOp,1);
+				}
+
 
 				cerr << "On lance le semaphore bloquant" << endl;
 
@@ -160,6 +187,8 @@ void Entree(TypeBarriere Parametrage,int pmemID, int psemID){
 			//On met a jour le Semaphore compteur de place
 			struct sembuf pOp = {SemaphoreCompteurPlaces,-1,0};
 			semop(semID,&pOp,1);
+
+
 
 			cerr <<"Valeur sem : " <<semctl(semID,SemaphoreCompteurPlaces,GETVAL,0) << endl;
 

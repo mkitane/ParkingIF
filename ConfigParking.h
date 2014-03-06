@@ -30,7 +30,7 @@
 static const char* canalProfBP = "fifo1" ;
 static const char* canalSortie = "fifo4" ;
 
-const int NB_SEM = 4;
+const int NB_SEM = 5;
 const int TEMPO = 1 ;
 //static const char* canalAutreBP = "fifo2" ;
 //static const char* canalGB = "fifo3" ;
@@ -58,7 +58,8 @@ typedef enum Semaphore
 	SemaphoreCompteurPlaces = 0,
 	SynchroPorteBPPROF = 1,
 	SynchroPorteBPAUTRE = 2,
-	SynchroPorteGB = 3
+	SynchroPorteGB = 3,
+	MutexMP = 4
 }Semaphore;
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
