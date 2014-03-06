@@ -54,13 +54,12 @@ static int semID;
 static void handlerEntree(int noSignal){
 	if(noSignal == SIGUSR2){
 
-		//TODO: A REGLER : Voiturier ne quitte pas directement
 		map<pid_t,Voiture>::iterator it;
 		for(it=mapVoiture.begin(); it!= mapVoiture.end() ; it++){
-			//kill(it->first,SIGUSR2);
+			kill(it->first,SIGUSR2);
 		}
 		for(it=mapVoiture.begin(); it!= mapVoiture.end() ; it++){
-			//waitpid(it->first,NULL,0);
+			waitpid(it->first,NULL,0);
 		}
 
 		close(descR);
@@ -147,20 +146,23 @@ void Entree(TypeBarriere Parametrage,int pmemID, int psemID){
 				shmdt(a);
 
 				cerr << "On lance le semaphore bloquant" << endl;
-				struct sembuf pOp = {MutexPorteBPPROF,-1,0};
+
+				struct sembuf pOp = {SynchroPorteBPPROF,-1,0};
 				//Le processus reçoit un signal à intercepter, la valeur de semncnt est décrémentée et semop()
 				//échoue avec errno contenant le code d'erreur EINTR.
 				while(semop(semID,&pOp,1)==-1 && errno==EINTR);
 
 				cerr << "On efface la requete" << endl;
-				Effacer(REQUETE_R1);
+				Effacer((TypeZone)(8+Parametrage));
 			}
 
 
+			//On met a jour le Semaphore compteur de place
 			struct sembuf pOp = {SemaphoreCompteurPlaces,-1,0};
 			semop(semID,&pOp,1);
 
 			cerr <<"Valeur sem : " <<semctl(semID,SemaphoreCompteurPlaces,GETVAL,0) << endl;
+
 			// garage voiture ajout du pid voiturier dans la list
 			pid_t voiturier=GarerVoiture(Parametrage);
 			mapVoiture.insert(pair<pid_t,Voiture>(voiturier,voiture));

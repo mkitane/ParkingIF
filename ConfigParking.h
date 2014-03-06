@@ -56,9 +56,9 @@ typedef struct memStruct{
 typedef enum Semaphore
 {
 	SemaphoreCompteurPlaces = 0,
-	MutexPorteBPPROF = 1,
-	MutexPorteBPAUTRE = 2,
-	MutexPorteGB = 3
+	SynchroPorteBPPROF = 1,
+	SynchroPorteBPAUTRE = 2,
+	SynchroPorteGB = 3
 }Semaphore;
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques

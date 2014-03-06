@@ -47,6 +47,71 @@ static int descR;
 static int memID;
 static int semID;
 //------------------------------------------------------ Fonctions privées
+static bool operator < (enum TypeUsager lhs, enum TypeUsager rhs)
+{
+    //On inverse l'ordre car ici on veux
+    //AUCUN<AUTRE<PROF
+    //Or notre enum nous donne AUCUN<PROF<AUTRE
+    if(lhs == 2 && rhs == 1) return true;
+    if(lhs == 1 && rhs == 2) return false;
+    return (int)lhs<(int)rhs;
+}
+
+static int getMax(Voiture const &a, Voiture const &b, Voiture const &c){
+	Voiture requetePrio = a;
+	//Ordre Type Usager = AUCUN,PROF,AUTRE
+
+	if(requetePrio.TypeUsager < b.TypeUsager){
+		requetePrio= b;
+	}else if(b.TypeUsager == requetePrio.TypeUsager){
+		if(b.heureArrivee < requetePrio.heureArrivee){
+			requetePrio= b;
+		}
+	}
+
+
+	if(requetePrio.TypeUsager < c.TypeUsager){
+        requetePrio= c;
+	}else if(c.TypeUsager == requetePrio.TypeUsager){
+		if(c.heureArrivee < requetePrio.heureArrivee){
+			requetePrio= c;
+		}
+	}
+
+
+
+    if(requetePrio.TypeUsager == AUCUN){
+        return 0;
+    }
+    if(requetePrio.TypeUsager == a.TypeUsager && requetePrio.heureArrivee == a.heureArrivee){
+        return 1;
+    }
+    if(requetePrio.TypeUsager == b.TypeUsager && requetePrio.heureArrivee == b.heureArrivee){
+        return 2;
+    }
+    if(requetePrio.TypeUsager == c.TypeUsager && requetePrio.heureArrivee == c.heureArrivee){
+        return 3;
+    }
+
+    return 0;
+}
+static int gererPriorite(int memID){
+	Voiture requetePorteBPPROF;
+	Voiture requetePorteBPAUTRE;
+	Voiture requetePorteGB;
+
+	//Baisser Mutex Pour lecture sur memoire
+	memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
+	requetePorteBPPROF = a->requetePorteBPPROF;
+	requetePorteBPAUTRE = a->requetePorteBPAUTRE;
+	requetePorteGB = a->requetePorteGB;
+	shmdt(a);
+	//Lever mutex
+
+	//Gestion Priorite
+	//Rappel Prof tjrs Prioritaire Ensuite Temps
+	return getMax(requetePorteBPPROF, requetePorteBPAUTRE, requetePorteGB);
+}
 static void handlerSortie(int noSignal){
 	if(noSignal == SIGUSR2){
 		for(vector<pid_t>::iterator itLE = voituriersEnSortie.begin(); itLE != voituriersEnSortie.end(); itLE++){
@@ -84,16 +149,29 @@ static void handlerSortie(int noSignal){
 		semop(semID,&vOp,1);
 
 
-		//Si une requete est en attente, on la satisfait!
-		//Recuperer la voiture sur la mémoire partagée
-		if( semctl(semID,SemaphoreCompteurPlaces,GETVAL,0) == 1){
+		unsigned short int prio = gererPriorite(memID);
+		if(prio!=0){
+			//Si une requete est en attente, on la satisfait!
 
-			cerr<<"on libere une voiture" << endl;
+
 			memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
+			if(prio==1){
+				//On efface la requete correspondante dans la mem partagee
+				a->requetePorteBPPROF = {AUCUN, 0,0};
+			}
+			if(prio==2){
+				//On efface la requete correspondante dans la mem partagee
+				a->requetePorteBPAUTRE = {AUCUN, 0,0};
+			}
+			if(prio==3){
+				//On efface la requete correspondante dans la mem partagee
+				a->requetePorteGB = {AUCUN, 0,0};
+			}
 			shmdt(a);
 
 
-			struct sembuf pOp2 = {MutexPorteBPPROF,1,0};
+			cerr<<"On gere une priorite" << endl;
+			struct sembuf pOp2 = {prio,1,0};
 			semop(semID,&pOp2,1);
 		}
 

@@ -107,11 +107,11 @@ int main (void)
 
 	//Initialisation des semaphores
 		//Initialisation du semaphore compteur de places
-	semctl(semID,SemaphoreCompteurPlaces,SETVAL,8);
+	semctl(semID,SemaphoreCompteurPlaces,SETVAL,NB_PLACES);
 		//Initialisation des mutexs
-	semctl(semID,MutexPorteBPPROF,SETVAL,0);
-	semctl(semID,MutexPorteBPAUTRE,SETVAL,0);
-	semctl(semID,MutexPorteGB,SETVAL,0);
+	semctl(semID,SynchroPorteBPPROF,SETVAL,0);
+	semctl(semID,SynchroPorteBPAUTRE,SETVAL,0);
+	semctl(semID,SynchroPorteGB,SETVAL,0);
 
 
 
