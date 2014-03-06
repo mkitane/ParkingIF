@@ -146,11 +146,13 @@ void Entree(TypeBarriere Parametrage,int pmemID, int psemID){
 				a->requetePorteBPPROF =  voiture ;
 				shmdt(a);
 
-
+				cerr << "On lance le semaphore bloquant" << endl;
 				struct sembuf pOp = {MutexPorteBPPROF,-1,0};
-				semop(semID,&pOp,1);
+				//Le processus reçoit un signal à intercepter, la valeur de semncnt est décrémentée et semop()
+				//échoue avec errno contenant le code d'erreur EINTR.
+				while(semop(semID,&pOp,1)==-1 && errno==EINTR);
 
-
+				cerr << "On efface la requete" << endl;
 				Effacer(REQUETE_R1);
 			}
 
@@ -158,7 +160,7 @@ void Entree(TypeBarriere Parametrage,int pmemID, int psemID){
 			struct sembuf pOp = {SemaphoreCompteurPlaces,-1,0};
 			semop(semID,&pOp,1);
 
-
+			cerr <<"Valeur sem : " <<semctl(semID,SemaphoreCompteurPlaces,GETVAL,0) << endl;
 			// garage voiture ajout du pid voiturier dans la list
 			pid_t voiturier=GarerVoiture(Parametrage);
 			mapVoiture.insert(pair<pid_t,Voiture>(voiturier,voiture));
