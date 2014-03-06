@@ -25,6 +25,8 @@
 #include <algorithm>
 
 
+#include <iostream>
+
 //memoire
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -63,35 +65,8 @@ static void handlerSortie(int noSignal){
 		pid_t filsFini = wait(&status);
 
 		//Efface la bonne voiture sur lecran
-		switch(WEXITSTATUS(status))
-		{
-			case(1):
-				Effacer(ETAT_P1);
-				break;
-			case(2):
-				Effacer(ETAT_P2);
-				break;
-			case(3):
-				Effacer(ETAT_P3);
-				break;
-			case(4):
-				Effacer(ETAT_P4);
-				break;
-			case(5):
-				Effacer(ETAT_P5);
-				break;
-			case(6):
-				Effacer(ETAT_P6);
-				break;
-			case(7):
-				Effacer(ETAT_P7);
-				break;
-			case(8):
-				Effacer(ETAT_P8);
-				break;
-			default:
-				break;
-		}
+		Effacer((TypeZone)WEXITSTATUS(status));
+
 
 
 		//Recuperer la voiture sur la mémoire partagée
@@ -107,6 +82,21 @@ static void handlerSortie(int noSignal){
 
 		struct sembuf vOp = {SemaphoreCompteurPlaces,1,0};
 		semop(semID,&vOp,1);
+
+
+		//Si une requete est en attente, on la satisfait!
+		//Recuperer la voiture sur la mémoire partagée
+		if( semctl(semID,SemaphoreCompteurPlaces,GETVAL,0) == 1){
+
+			cerr<<"on libere une voiture" << endl;
+			memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
+			shmdt(a);
+
+
+			struct sembuf pOp2 = {MutexPorteBPPROF,1,0};
+			semop(semID,&pOp2,1);
+		}
+
 	}
 }
 //////////////////////////////////////////////////////////////////  PUBLIC

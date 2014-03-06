@@ -27,6 +27,7 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/sem.h>
+#include <errno.h>
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
 
@@ -56,10 +57,10 @@ static void handlerEntree(int noSignal){
 		//TODO: A REGLER : Voiturier ne quitte pas directement
 		map<pid_t,Voiture>::iterator it;
 		for(it=mapVoiture.begin(); it!= mapVoiture.end() ; it++){
-			kill(it->first,SIGUSR2);
+			//kill(it->first,SIGUSR2);
 		}
 		for(it=mapVoiture.begin(); it!= mapVoiture.end() ; it++){
-			waitpid(it->first,NULL,0);
+			//waitpid(it->first,NULL,0);
 		}
 
 		close(descR);
@@ -132,28 +133,39 @@ void Entree(TypeBarriere Parametrage,int pmemID, int psemID){
 
 		if(read(descR,&voiture,sizeof(Voiture)) > 0){
 
+			DessinerVoitureBarriere(Parametrage,voiture.TypeUsager);
 
-			if( semctl(semID,SemaphoreCompteurPlaces,GETVAL,0) > 0){
+			if( semctl(semID,SemaphoreCompteurPlaces,GETVAL,0) <= 0){
+				//On place en liste d'attente !
+				AfficherRequete(Parametrage, voiture.TypeUsager, voiture.heureArrivee);
 
-				//On reduit de 1 le semaphore
-				//TODO: Ne faut-il pas garantir l'integrite de ttes ces operations? Tous en mm tps
-				struct sembuf pOp = {SemaphoreCompteurPlaces,-1,0};
+
+				//On ecrit dans la mémoire partagée que l'on a une requete !
+				//Ecrire la voiture sur la mémoire partagée
+				memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
+				a->requetePorteBPPROF =  voiture ;
+				shmdt(a);
+
+
+				struct sembuf pOp = {MutexPorteBPPROF,-1,0};
 				semop(semID,&pOp,1);
 
-				cerr << "Valeur du semaphore : " <<semctl(semID,SemaphoreCompteurPlaces,GETVAL,0) <<endl;
 
-
-				// garage voiture ajout du pid voiturier dans la list
-				DessinerVoitureBarriere(Parametrage,voiture.TypeUsager);
-				pid_t voiturier=GarerVoiture(Parametrage);
-
-				mapVoiture.insert(pair<pid_t,Voiture>(voiturier,voiture));
-				//sleep 1s
-				sleep(TEMPO);
-
-			}else{
-				//On place en liste d'attente !
+				Effacer(REQUETE_R1);
 			}
+
+
+			struct sembuf pOp = {SemaphoreCompteurPlaces,-1,0};
+			semop(semID,&pOp,1);
+
+
+			// garage voiture ajout du pid voiturier dans la list
+			pid_t voiturier=GarerVoiture(Parametrage);
+			mapVoiture.insert(pair<pid_t,Voiture>(voiturier,voiture));
+
+			//sleep 1s
+			sleep(TEMPO);
+
 		}
 	}
 

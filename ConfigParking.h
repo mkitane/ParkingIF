@@ -25,6 +25,7 @@
 #define TERMINALUTILISE XTERM
 #define DROITSCANAL 0660
 #define DROITSMEM 0660
+#define DROITSEMAPHORE 0666
 
 static const char* canalProfBP = "fifo1" ;
 static const char* canalSortie = "fifo4" ;

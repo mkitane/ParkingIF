@@ -50,11 +50,13 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-static int memID;
-static int semID;
 int main (void)
 //Algorithme :
 {
+
+	int memID;
+	int semID;
+
 	//Declaration des differents pids des processus déclarés
 	pid_t noClavier;
 	pid_t noHeure;
@@ -78,7 +80,7 @@ int main (void)
 
 
 	//Creation de la memoire partagee
-	memID = shmget(ftok(memoirePartagee,0), sizeof(memStruct), IPC_CREAT | IPC_EXCL | DROITSMEM);
+	memID = shmget(ftok(memoirePartagee,1), sizeof(memStruct), IPC_CREAT | IPC_EXCL | DROITSMEM);
 
 	if(memID == -1){
 		cerr << "erreur creation memoire Partagee" << endl;
@@ -96,7 +98,7 @@ int main (void)
 	shmdt(a);
 
 	//Creation des semaphores
-	semID = semget(ftok(memoirePartagee,1), NB_SEM , IPC_CREAT | IPC_EXCL | DROITSMEM);
+	semID = semget(ftok(memoirePartagee,2), NB_SEM , IPC_CREAT | IPC_EXCL | DROITSEMAPHORE);
 
 	if(semID == -1){
 		cerr << "erreur creation semaphore" << endl;
@@ -107,9 +109,9 @@ int main (void)
 		//Initialisation du semaphore compteur de places
 	semctl(semID,SemaphoreCompteurPlaces,SETVAL,8);
 		//Initialisation des mutexs
-	semctl(semID,MutexPorteBPPROF,SETVAL,1);
-	semctl(semID,MutexPorteBPAUTRE,SETVAL,1);
-	semctl(semID,MutexPorteGB,SETVAL,1);
+	semctl(semID,MutexPorteBPPROF,SETVAL,0);
+	semctl(semID,MutexPorteBPAUTRE,SETVAL,0);
+	semctl(semID,MutexPorteGB,SETVAL,0);
 
 
 
@@ -157,8 +159,7 @@ int main (void)
 		shmctl(memID, IPC_RMID,0);
 
 		//Suppression du semaphore
-		semctl(semID, IPC_RMID, 0);
-
+		semctl(semID, 0, IPC_RMID, 0);
 
 		TerminerApplication();
 		exit(0);
