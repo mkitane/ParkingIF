@@ -169,6 +169,15 @@ static void moteur()
 static void destruction(int noSignal)
 {
 	if(noSignal == SIGUSR2){
+		//On masque SIGCHLD avant de killer !
+		struct sigaction action;
+		action.sa_handler = SIG_IGN ;
+		sigemptyset(&action.sa_mask);
+		action.sa_flags = 0 ;
+		//armer sigusr2 sur handlerEntree;
+		sigaction(SIGCHLD,&action,NULL);
+
+
 		for(vector<pid_t>::iterator itLE = voituriersEnSortie.begin(); itLE != voituriersEnSortie.end(); itLE++){
 			kill(*itLE, SIGUSR2);
 		}

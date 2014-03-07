@@ -143,20 +143,22 @@ static void moteur(TypeBarriere Parametrage)
 static void destruction(int noSignal)
 {
 	if(noSignal == SIGUSR2){
-		cerr << "We begin killing nass 1" << endl;
-		for(map<pid_t,Voiture>::iterator it=mapVoiture.begin(); it!= mapVoiture.end() ; it++){
-			cerr << "Contenu Of Map : PID : " << it->first << "Voiture : " << it->second.numeroVoiture << endl;
-		}
+		//On masque SIGCHLD avant de killer !
+		struct sigaction action;
+		action.sa_handler = SIG_IGN ;
+		sigemptyset(&action.sa_mask);
+		action.sa_flags = 0 ;
+		//armer sigusr2 sur handlerEntree;
+		sigaction(SIGCHLD,&action,NULL);
+
+
 
 		for(map<pid_t,Voiture>::iterator it=mapVoiture.begin(); it!= mapVoiture.end() ; it++){
-			cerr << "We are killing nass 2" << endl;
 			kill(it->first,SIGUSR2);
 		}
 		for(map<pid_t,Voiture>::iterator it=mapVoiture.begin(); it!= mapVoiture.end() ; it++){
-			cerr << "We are ending killing nass 3" << endl;
 			waitpid(it->first,NULL,0);
 		}
-		cerr << "We end killing nass 4" << endl;
 
 		close(descR);
 		exit(0);
@@ -167,7 +169,7 @@ static void receptionMortVoiturier(int noSignal)
 {
 
 	if(noSignal == SIGCHLD){
-
+		cerr << "this is maybe called" << endl;
 		int status;
 		//Recuperer le fils qui a envoye le SIGCHLD
 		pid_t filsFini = wait(&status);
