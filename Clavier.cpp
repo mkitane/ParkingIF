@@ -23,35 +23,39 @@
 //------------------------------------------------------------------ Types
 
 //---------------------------------------------------- Variables statiques
-
-//------------------------------------------------------ Fonctions privées
-//static type nom ( liste de paramètres )
-// Mode d'emploi :
-//
-// Contrat :
-//
-// Algorithme :
-//
-//{
-//} //----- fin de nom
-
-//////////////////////////////////////////////////////////////////  PUBLIC
-//---------------------------------------------------- Fonctions publiques
 static int descProfBPW ;
 static int descSortieW;
 static int descGBW ;
 static int descAutreBPW ;
-
 static int compteurVoiture = 0;
-void Clavier()
-// Algorithme :
-//
+
+//------------------------------------------------------ Fonctions privées
+static void init()
 {
 	//Ouverture Canal
 	descProfBPW = open(canalProfBP,O_WRONLY);
 	descAutreBPW  = open(canalAutreBP,O_WRONLY);
 	descGBW = open(canalGB,O_WRONLY);
 	descSortieW = open(canalSortie, O_WRONLY);
+}
+
+static void destruction()
+{
+	close(descSortieW);
+	close(descGBW);
+	close(descAutreBPW);
+	close(descProfBPW);
+
+	exit(0);
+}
+//////////////////////////////////////////////////////////////////  PUBLIC
+//---------------------------------------------------- Fonctions publiques
+
+void Clavier()
+// Algorithme :
+//
+{
+	init();
 
 	for(;;){
 		Menu();
@@ -63,12 +67,7 @@ void Commande(char code, unsigned int valeur)
 //
 {
 	if(code == 'Q'){
-		close(descProfBPW);
-		close(descAutreBPW);
-		close(descGBW);
-		close(descSortieW);
-
-		exit(0);
+		destruction();
 	}else if(code == 'P'){
 		compteurVoiture++;
 		if(compteurVoiture > 999){

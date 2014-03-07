@@ -58,7 +58,6 @@ static bool operator < (enum TypeUsager lhs, enum TypeUsager rhs)
     if(lhs == 1 && rhs == 2) return false;
     return (int)lhs<(int)rhs;
 }
-
 static int getMax(Voiture const &a, Voiture const &b, Voiture const &c){
 	Voiture requetePrio = a;
 	//Ordre Type Usager = AUCUN,PROF,AUTRE
@@ -125,7 +124,50 @@ static int gererPriorite(int memID){
 	//Rappel Prof tjrs Prioritaire Ensuite Temps
 	return getMax(requetePorteBPPROF, requetePorteBPAUTRE, requetePorteGB);
 }
-static void handlerSortie(int noSignal){
+
+
+static void init();
+static void moteur();
+static void destruction(int noSignal);
+static void receptionMortVoiturier(int noSignal);
+
+
+static void init()
+{
+	//Installation du handler
+	struct sigaction action;
+	action.sa_handler = destruction ;
+	sigemptyset(&action.sa_mask);
+	action.sa_flags = 0 ;
+	sigaction(SIGUSR2,&action,NULL); //armer sigusr2 sur destruction;
+
+
+	struct sigaction actionMortVoiturier;
+	actionMortVoiturier.sa_handler = receptionMortVoiturier ;
+	sigemptyset(&actionMortVoiturier.sa_mask);
+	actionMortVoiturier.sa_flags = 0 ;
+	sigaction(SIGCHLD,&actionMortVoiturier,NULL); //armer SigCHLD sur receptionMortVoiturier;
+
+	//Ouverture du canal de la sortie
+	descR = open(canalSortie,O_RDONLY);
+}
+
+static void moteur()
+{
+	int numeroPlace;
+
+	//Lecture sur le canal du numero de la place
+	if(read(descR,&numeroPlace,sizeof(int)) > 0){
+		pid_t voiturierSortie = SortirVoiture(numeroPlace);
+
+		//on stocke les voituriers en sortie pour pouvoir les supprimer
+		//si on appuie sur Q
+		voituriersEnSortie.push_back(voiturierSortie);
+	}
+}
+
+static void destruction(int noSignal)
+{
 	if(noSignal == SIGUSR2){
 		for(vector<pid_t>::iterator itLE = voituriersEnSortie.begin(); itLE != voituriersEnSortie.end(); itLE++){
 			kill(*itLE, SIGUSR2);
@@ -136,6 +178,10 @@ static void handlerSortie(int noSignal){
 		close(descR);
 		exit(0);
 	}
+}
+
+static void receptionMortVoiturier(int noSignal)
+{
 
 	if(noSignal == SIGCHLD){
 		int status;
@@ -209,32 +255,11 @@ void Sortie(int pmemID , int psemID){
 	memID = pmemID;
 	semID = psemID;
 
-	//Installation du handler
-	struct sigaction action;
 
-	action.sa_handler = handlerSortie ;
-	sigemptyset(&action.sa_mask);
-	action.sa_flags = 0 ;
+	init();
 
-
-	//armer sigusr2 sur handlerSortie;
-	sigaction(SIGUSR2,&action,NULL);
-	sigaction(SIGCHLD,&action,NULL);
-
-	//Ouverture du canal de la sortie
-	descR = open(canalSortie,O_RDONLY);
-
-
-	int numeroPlace;
 	for(;;){
-		//Lecture sur le canal du numero de la place
-		if(read(descR,&numeroPlace,sizeof(int)) > 0){
-			pid_t voiturierSortie = SortirVoiture(numeroPlace);
-
-			//on stocke les voituriers en sortie pour pouvoir les supprimer
-			//si on appuie sur Q
-			voituriersEnSortie.push_back(voiturierSortie);
-		}
+		moteur();
 	}
 
 }

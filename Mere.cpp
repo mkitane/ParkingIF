@@ -159,24 +159,27 @@ int main (void)
 
 
 		//Demande de fin avec envoi de SIGUSR2
-		kill(noHeure, SIGUSR2);
-		kill(noEntreeUn,SIGUSR2);
-		kill(noEntreeDeux,SIGUSR2);
-		kill(noEntreeTrois,SIGUSR2);
-
 		kill(noSortie,SIGUSR2);
+		kill(noEntreeTrois,SIGUSR2);
+		kill(noEntreeDeux,SIGUSR2);
+		kill(noEntreeUn,SIGUSR2);
+		kill(noHeure, SIGUSR2);
+
 
 		//attente de fin des processus fils
-		waitpid(noHeure, NULL,0);
-		waitpid(noEntreeUn,NULL,0);
-		waitpid(noEntreeDeux,NULL,0);
-		waitpid(noEntreeTrois,NULL,0);
-
 		waitpid(noSortie,NULL,0);
+		waitpid(noEntreeTrois,NULL,0);
+		waitpid(noEntreeDeux,NULL,0);
+		waitpid(noEntreeUn,NULL,0);
+		waitpid(noHeure, NULL,0);
+
 
 		//fermeture des canaux de communication
-		unlink(canalProfBP);
 		unlink(canalSortie);
+		unlink(canalGB);
+		unlink(canalAutreBP);
+		unlink(canalProfBP);
+
 
 		//Suppression memoire partagee
 		shmctl(memID, IPC_RMID,0);
