@@ -66,13 +66,13 @@ static void init(TypeBarriere Parametrage){
 	{
 		case(PROF_BLAISE_PASCAL):
 			//Prof Blaise Pascal
-			descR = open(canalProfBP,O_RDONLY);
+			descR = open(CANAL_PROF_BP,O_RDONLY);
 			break;
 		case(AUTRE_BLAISE_PASCAL):
-			descR = open(canalAutreBP,O_RDONLY);
+			descR = open(CANAL_AUTRE_BP,O_RDONLY);
 			break;
 		case(ENTREE_GASTON_BERGER):
-			descR = open(canalGB,O_RDONLY);
+			descR = open(CANAL_GB,O_RDONLY);
 			break;
 		default:
 			break;
@@ -110,14 +110,12 @@ static void moteur(TypeBarriere Parametrage)
 				}
 
 
-				cerr << "On lance le semaphore bloquant" << endl;
 
 				struct sembuf pOp = {Parametrage,-1,0};
 				//Le processus reçoit un signal à intercepter, la valeur de semncnt est décrémentée et semop()
 				//échoue avec errno contenant le code d'erreur EINTR.
 				while(semop(semID,&pOp,1)==-1 && errno==EINTR);
 
-				cerr << "On efface la requete" << endl;
 				Effacer((TypeZone)(8+Parametrage));
 			}
 
@@ -128,7 +126,6 @@ static void moteur(TypeBarriere Parametrage)
 
 
 
-			cerr <<"Valeur sem : " <<semctl(semID,SemaphoreCompteurPlaces,GETVAL,0) << endl;
 
 			// garage voiture ajout du pid voiturier dans la list
 			pid_t voiturier=GarerVoiture(Parametrage);
@@ -169,7 +166,6 @@ static void receptionMortVoiturier(int noSignal)
 {
 
 	if(noSignal == SIGCHLD){
-		cerr << "this is maybe called" << endl;
 		int status;
 		//Recuperer le fils qui a envoye le SIGCHLD
 		pid_t filsFini = wait(&status);

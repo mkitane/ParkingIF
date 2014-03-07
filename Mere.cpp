@@ -69,26 +69,26 @@ int main (void)
 
 	//Mise en place du canal de communication entre la mere et le clavier
 	//Creation des differents canaux de communication nommes
-	if(mkfifo(canalProfBP,DROITSCANAL) == -1){
+	if(mkfifo(CANAL_PROF_BP,DROITS_CANAL) == -1){
 		cerr<< "erreur creation du canal entre entree et clavier" << endl;
 		return -1 ;
 	}
-	if(mkfifo(canalAutreBP,DROITSCANAL) == -1){
+	if(mkfifo(CANAL_AUTRE_BP,DROITS_CANAL) == -1){
 		cerr<< "erreur creation du canal entre entree et clavier" << endl;
 		return -1 ;
 	}
-	if(mkfifo(canalGB,DROITSCANAL) == -1){
+	if(mkfifo(CANAL_GB,DROITS_CANAL) == -1){
 		cerr<< "erreur creation du canal entre entree et clavier" << endl;
 		return -1 ;
 	}
-	if(mkfifo(canalSortie,DROITSCANAL) == -1){
+	if(mkfifo(CANAL_SORTIE,DROITS_CANAL) == -1){
 		cerr<< "erreur creation du canal entre sortie et clavier" << endl;
 		return -1 ;
 	}
 
 
 	//Creation de la memoire partagee
-	memID = shmget(ftok(memoirePartagee,1), sizeof(memStruct), IPC_CREAT | IPC_EXCL | DROITSMEM);
+	memID = shmget(ftok(CHEMIN_EXE,1), sizeof(memStruct), IPC_CREAT | IPC_EXCL | DROITS_MEMOIRE);
 
 	if(memID == -1){
 		cerr << "erreur creation memoire Partagee" << endl;
@@ -106,7 +106,7 @@ int main (void)
 	shmdt(a);
 
 	//Creation des semaphores
-	semID = semget(ftok(memoirePartagee,2), NB_SEM , IPC_CREAT | IPC_EXCL | DROITSEMAPHORE);
+	semID = semget(ftok(CHEMIN_EXE,2), NB_SEM , IPC_CREAT | IPC_EXCL | DROITS_SEMAPHORE);
 
 	if(semID == -1){
 		cerr << "erreur creation semaphore" << endl;
@@ -175,10 +175,10 @@ int main (void)
 
 
 		//fermeture des canaux de communication
-		unlink(canalSortie);
-		unlink(canalGB);
-		unlink(canalAutreBP);
-		unlink(canalProfBP);
+		unlink(CANAL_SORTIE);
+		unlink(CANAL_GB);
+		unlink(CANAL_AUTRE_BP);
+		unlink(CANAL_PROF_BP);
 
 
 		//Suppression memoire partagee

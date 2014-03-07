@@ -23,20 +23,20 @@
 
 //------------------------------------------------------------- Constantes
 #define TERMINALUTILISE XTERM
-#define DROITSCANAL 0660
-#define DROITSMEM 0660
-#define DROITSEMAPHORE 0666
+#define DROITS_CANAL 0660
+#define DROITS_MEMOIRE 0660
+#define DROITS_SEMAPHORE 0666
 
-static const char* canalProfBP = "fifo1" ;
-static const char* canalAutreBP = "fifo2" ;
-static const char* canalGB = "fifo3" ;
-static const char* canalSortie = "fifo4" ;
+#define CANAL_PROF_BP  "canalProfBP"
+#define CANAL_AUTRE_BP "canalAutreBP"
+#define CANAL_GB  "canalGB"
+#define CANAL_SORTIE "canalSortie"
 
 const int NB_SEM = 5;
 const int TEMPO = 1 ;
 
 
-static const char* memoirePartagee = "Parking";
+#define CHEMIN_EXE  "Parking"
 //------------------------------------------------------------------ Types
 
 typedef struct Voiture {

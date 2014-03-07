@@ -19,4 +19,4 @@ for id in $IPCS_Q; do
   ipcrm -q $id;
 done
 
-rm fifo*
+rm canal*

@@ -33,10 +33,10 @@ static int compteurVoiture = 0;
 static void init()
 {
 	//Ouverture Canal
-	descProfBPW = open(canalProfBP,O_WRONLY);
-	descAutreBPW  = open(canalAutreBP,O_WRONLY);
-	descGBW = open(canalGB,O_WRONLY);
-	descSortieW = open(canalSortie, O_WRONLY);
+	descProfBPW = open(CANAL_PROF_BP,O_WRONLY);
+	descAutreBPW  = open(CANAL_AUTRE_BP,O_WRONLY);
+	descGBW = open(CANAL_GB,O_WRONLY);
+	descSortieW = open(CANAL_SORTIE, O_WRONLY);
 }
 
 static void destruction()

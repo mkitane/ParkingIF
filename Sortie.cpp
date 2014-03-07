@@ -149,7 +149,7 @@ static void init()
 	sigaction(SIGCHLD,&actionMortVoiturier,NULL); //armer SigCHLD sur receptionMortVoiturier;
 
 	//Ouverture du canal de la sortie
-	descR = open(canalSortie,O_RDONLY);
+	descR = open(CANAL_SORTIE,O_RDONLY);
 }
 
 static void moteur()
@@ -184,6 +184,8 @@ static void destruction(int noSignal)
 		for(vector<pid_t>::iterator itLE = voituriersEnSortie.begin(); itLE != voituriersEnSortie.end(); itLE++){
 			waitpid(*itLE,NULL,0);
 		}
+
+
 		close(descR);
 		exit(0);
 	}
@@ -249,7 +251,6 @@ static void receptionMortVoiturier(int noSignal)
 			}
 
 
-			cerr<<"On gere une priorite" << endl;
 			struct sembuf pOp2 = {prio,1,0};
 			semop(semID,&pOp2,1);
 		}
