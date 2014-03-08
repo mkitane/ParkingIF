@@ -1,0 +1,14 @@
+RQ : 
+
+Les insertions et suppressions de la map des voitures ne sont pas indiquées ! 
+
+Pour l’entree et la sortie il manque la reception Mort Voiturier
+
+Ne pas oublier de rajouter les commandes Linux!
+
+
+Pour les canaux : Bien faire gaffe ou la flèche va ! Vers le haut et le bas toujours !!! 
+
+Ne pas oublier attachement et détachement mémoire
+
+Rajouter bifurcation pour la fin ??
