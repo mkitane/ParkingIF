@@ -2,8 +2,7 @@
                            ConfigParking  -  description
                              -------------------
     début                :
-    copyright            : (C)  par
-    e-mail               :
+    copyright            : (C) 2014 par Mehdi Kitane
 *************************************************************************/
 
 //---------- Interface de la tâche <Clavier> (fichier Clavier.h) -------

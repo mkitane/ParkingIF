@@ -1,9 +1,8 @@
 /*************************************************************************
                            Entree  -  description
                              -------------------
-    début                : Entree
-    copyright            : (C) Entree par Entree
-    e-mail               : Entree
+    début                :
+    copyright            : (C) 2014 par Mehdi Kitane
 *************************************************************************/
 
 //---------- Réalisation de la tâche <Entree> (fichier Entree.cpp) ---

@@ -1,9 +1,8 @@
 /*************************************************************************
                            Sortie  -  description
                              -------------------
-    début                : Sortie
-    copyright            : (C) Sortie par Sortie
-    e-mail               : Sortie
+    début                :
+    copyright            : (C) 2014 par Mehdi Kitane
 *************************************************************************/
 
 //---------- Interface de la tâche <Sortie> (fichier Sortie.h) -------

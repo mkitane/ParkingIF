@@ -1,10 +1,9 @@
 /*************************************************************************
-                           Clavier  -  description
-                             -------------------
-    début                : Clavier
-    copyright            : (C) Clavier par Clavier
-    e-mail               : Clavier
-*************************************************************************/
+                        Clavier  -  description
+                          -------------------
+ début                :
+ copyright            : (C) 2014 par Mehdi Kitane
+ *************************************************************************/
 
 //---------- Réalisation de la tâche <Clavier> (fichier Clavier.cpp) ---
 

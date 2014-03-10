@@ -1,9 +1,8 @@
 /*************************************************************************
                            Mere  -  description
                              -------------------
-    début                : Mere
-    copyright            : (C) Mere par Mere
-    e-mail               : Mere
+    début                : 
+    copyright            : (C) 2014 par Mehdi Kitane
 *************************************************************************/
 
 //---------- Réalisation de la tâche <Mere> (fichier Mere.cpp) ---
