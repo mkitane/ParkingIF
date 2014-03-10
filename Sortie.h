@@ -12,8 +12,7 @@
 
 //------------------------------------------------------------------------
 // Rôle de la tâche <Sortie>
-//
-//
+//	La tache Sortie permet de gérer les voituriers qui sortent du Parking
 //------------------------------------------------------------------------
 
 /////////////////////////////////////////////////////////////////  INCLUDE
@@ -26,9 +25,8 @@
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 void Sortie(int pmemID, int psemID);
-//TODO : CHANGER LE INT PARAMETRAGE PLUTARD
 // Mode d'emploi :
-//
+//	Processus fils Sortie
 // Contrat :
 //
 

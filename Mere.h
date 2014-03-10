@@ -12,8 +12,9 @@
 
 //------------------------------------------------------------------------
 // Rôle de la tâche <Mere>
-//
-//
+//	Le role de la tache mère est de coordiner la création et la destruction
+//	de ses processus fils et de mettre en place et detruires les
+//	differents ressources systemes crées
 //------------------------------------------------------------------------
 
 /////////////////////////////////////////////////////////////////  INCLUDE
@@ -25,11 +26,9 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-// type Nom ( liste de paramètres );
-// Mode d'emploi :
-//
-// Contrat :
-//
+int main();
+//Mode d'emploi
+//	Processus principal Mere
 
 #endif // Mere_H
 

@@ -17,18 +17,14 @@
 #include <signal.h>
 #include <sys/stat.h>
 #include <iostream>
-
-
 #include <sys/ipc.h>
 #include <sys/shm.h>
-
 #include <sys/sem.h>
 //------------------------------------------------------ Include personnel
 #include "Mere.h"
 #include "Clavier.h"
 #include "Entree.h"
 #include "Sortie.h"
-#include "/public/tp/tp-multitache/Outils.h"
 #include "/public/tp/tp-multitache/Heure.h"
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
@@ -38,20 +34,11 @@
 //---------------------------------------------------- Variables statiques
 
 //------------------------------------------------------ Fonctions privées
-//static type nom ( liste de paramètres )
-// Mode d'emploi :
-//
-// Contrat :
-//
-// Algorithme :
-//
-//{
-//} //----- fin de nom
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-int main (void)
-//Algorithme :
+int main()
+// Processus rincipal Mere
 {
 
 	int memID;
@@ -67,7 +54,7 @@ int main (void)
 
 
 
-	//Mise en place du canal de communication entre la mere et le clavier
+	//Mise en place du canal de communication entre les entrees et le clavier
 	//Creation des differents canaux de communication nommes
 	if(mkfifo(CANAL_PROF_BP,DROITS_CANAL) == -1){
 		cerr<< "erreur creation du canal entre entree et clavier" << endl;
@@ -96,14 +83,14 @@ int main (void)
 	}
 
 	//Initialisation de la memoire partagee
-	memStruct *a = (memStruct *) shmat(memID, NULL, 0);
+	memStruct *a = (memStruct *) shmat(memID, NULL, 0); //attachement
 	for(int i=0; i<(int)NB_PLACES ; i++){
-		a->voituresPartagee[i] = {AUCUN, 0,0};
+		a->placesParking[i] = {AUCUN, 0,0};
 	}
 	for(int i=0; i<(int)NB_BARRIERES_ENTREE ; i++){
 		a->requetes[i] = {AUCUN, 0,0};
 	}
-	shmdt(a);
+	shmdt(a); //detachement
 
 	//Creation des semaphores
 	semID = semget(ftok(CHEMIN_EXE,2), NB_SEM , IPC_CREAT | IPC_EXCL | DROITS_SEMAPHORE);
@@ -129,6 +116,7 @@ int main (void)
 
 	noHeure = ActiverHeure();
 
+	//Lancement des differents processus Fils
 	if( (noClavier = fork() ) == 0 ){
 		/*Code du fils */
 		Clavier();

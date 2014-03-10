@@ -11,30 +11,20 @@
 /////////////////////////////////////////////////////////////////  INCLUDE
 //-------------------------------------------------------- Include système
 #include <signal.h>
-//exit
 #include <stdlib.h>
-//pipe
 #include <fcntl.h>
-//lecture pipe
 #include <sys/types.h>
 #include <unistd.h>
-//wait
 #include <sys/wait.h>
-//vector
 #include <vector>
 #include <algorithm>
-
-
 #include <iostream>
-
-//memoire
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/sem.h>
 
 #include <errno.h>
 //------------------------------------------------------ Include personnel
-#include "/public/tp/tp-multitache/Outils.h"
 #include "ConfigParking.h"
 ///////////////////////////////////////////////////////////////////  PRIVE
 
@@ -43,13 +33,15 @@
 //------------------------------------------------------------------ Types
 
 //---------------------------------------------------- Variables statiques
-//Vector plutot que map car pas besoin de stocker d'autres infos
-static vector<pid_t> voituriersEnSortie;
+static vector<pid_t> voituriersEnSortie; //Vecteur qui stocke les pid des
+//voituriers toujours en train de se garer
 static int descR;
 static int memID;
 static int semID;
 //------------------------------------------------------ Fonctions privées
 static bool operator < (enum TypeUsager lhs, enum TypeUsager rhs)
+//Mode d'emploi :
+//	Redefinition de l'opérateur < pour le type TypesUsager
 {
     //On inverse l'ordre car ici on veux
     //AUCUN<AUTRE<PROF
@@ -58,39 +50,44 @@ static bool operator < (enum TypeUsager lhs, enum TypeUsager rhs)
     if(lhs == 1 && rhs == 2) return false;
     return (int)lhs<(int)rhs;
 }
-static int gererPriorite(Voiture const &a, Voiture const &b, Voiture const &c){
+static int gererPriorite(Voiture const &a, Voiture const &b, Voiture const &c)
+//Mode d'emploi :
+//	Permet de gerer les prioritées entre prof et autre
+//	Un prof est toujours prioritaire
+//	Entre deux usagers de meme type, celui qui est arrivé en premier est
+//	servi en premier
+{
 	Voiture requetePrio = a;
-	//Ordre Type Usager = AUCUN,PROF,AUTRE
 
-	if(requetePrio.TypeUsager < b.TypeUsager){
+	if(requetePrio.typeUsager < b.typeUsager){
 		requetePrio= b;
-	}else if(b.TypeUsager == requetePrio.TypeUsager){
-		if(b.heureArrivee < requetePrio.heureArrivee){
+	}else if(b.typeUsager == requetePrio.typeUsager){
+		if(b.instantArrivee < requetePrio.instantArrivee){
 			requetePrio= b;
 		}
 	}
 
 
-	if(requetePrio.TypeUsager < c.TypeUsager){
+	if(requetePrio.typeUsager < c.typeUsager){
         requetePrio= c;
-	}else if(c.TypeUsager == requetePrio.TypeUsager){
-		if(c.heureArrivee < requetePrio.heureArrivee){
+	}else if(c.typeUsager == requetePrio.typeUsager){
+		if(c.instantArrivee < requetePrio.instantArrivee){
 			requetePrio= c;
 		}
 	}
 
 
 
-    if(requetePrio.TypeUsager == AUCUN){
+    if(requetePrio.typeUsager == AUCUN){
         return 0;
     }
-    if(requetePrio.TypeUsager == a.TypeUsager && requetePrio.heureArrivee == a.heureArrivee){
+    if(requetePrio.typeUsager == a.typeUsager && requetePrio.instantArrivee == a.instantArrivee){
         return 1;
     }
-    if(requetePrio.TypeUsager == b.TypeUsager && requetePrio.heureArrivee == b.heureArrivee){
+    if(requetePrio.typeUsager == b.typeUsager && requetePrio.instantArrivee == b.instantArrivee){
         return 2;
     }
-    if(requetePrio.TypeUsager == c.TypeUsager && requetePrio.heureArrivee == c.heureArrivee){
+    if(requetePrio.typeUsager == c.typeUsager && requetePrio.instantArrivee == c.instantArrivee){
         return 3;
     }
 
@@ -98,13 +95,13 @@ static int gererPriorite(Voiture const &a, Voiture const &b, Voiture const &c){
 }
 
 
-static void init();
-static void moteur();
 static void destruction(int noSignal);
 static void receptionMortVoiturier(int noSignal);
 
 
-static void init()
+static void initialisation()
+//Mode d'emploi :
+//	Phase d'initialisation du processus Sortie
 {
 	//Installation du handler
 	struct sigaction action;
@@ -126,6 +123,8 @@ static void init()
 }
 
 static void moteur()
+//Mode d'emploi
+//	Phase moteur du processus Sortie
 {
 	int numeroPlace;
 
@@ -133,13 +132,14 @@ static void moteur()
 	if(read(descR,&numeroPlace,sizeof(int)) > 0){
 		pid_t voiturierSortie = SortirVoiture(numeroPlace);
 
-		//on stocke les voituriers en sortie pour pouvoir les supprimer
-		//si on appuie sur Q
+		//on stocke les voituriers en sortie pour pouvoir les supprimer si on appuie sur Q
 		voituriersEnSortie.push_back(voiturierSortie);
 	}
 }
 
 static void destruction(int noSignal)
+//Mode d'emploi :
+//	Phase de destruction du processus Sortie
 {
 	if(noSignal == SIGUSR2){
 		//On masque SIGCHLD avant de killer !
@@ -152,19 +152,21 @@ static void destruction(int noSignal)
 
 
 		for(vector<pid_t>::iterator itLE = voituriersEnSortie.begin(); itLE != voituriersEnSortie.end(); itLE++){
-			kill(*itLE, SIGUSR2);
+			kill(*itLE, SIGUSR2);//Envoi du signal SIGUSR2 aux voitures en train de se garer
 		}
 		for(vector<pid_t>::iterator itLE = voituriersEnSortie.begin(); itLE != voituriersEnSortie.end(); itLE++){
-			waitpid(*itLE,NULL,0);
+			waitpid(*itLE,NULL,0);  //Attente de la fin des voitures a laquelles on a envoyé un signal
 		}
 
 
-		close(descR);
+		close(descR); //Fermeture du canal
 		exit(0);
 	}
 }
 
 static void receptionMortVoiturier(int noSignal)
+//Mode d'emploi
+//	--Handler pour le signal SIGCHLD
 {
 
 	if(noSignal == SIGCHLD){
@@ -193,24 +195,24 @@ static void receptionMortVoiturier(int noSignal)
 
 
 		//Recuperer la voiture et les demandes d'entree sur la mémoire partagée
-		memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
-		Voiture v = a->voituresPartagee[WEXITSTATUS(status)-1] ;
+		memStruct *a = (memStruct *) shmat(memID, NULL, 0) ; //Attachement
+		Voiture v = a->placesParking[WEXITSTATUS(status)-1] ;
 		requetePorteBPPROF = a->requetes[(int)PROF_BLAISE_PASCAL -1];
 		requetePorteBPAUTRE = a->requetes[(int)AUTRE_BLAISE_PASCAL -1];
 		requetePorteGB = a->requetes[(int)ENTREE_GASTON_BERGER -1];
-		shmdt(a);
+		shmdt(a); //Detachement
 
 		semop(semID,&liberer,1); //Liberation de la memoire
 
 
 
-		AfficherSortie(v.TypeUsager,v.numeroVoiture,v.heureArrivee, time(NULL));
+		AfficherSortie(v.typeUsager,v.numeroPlaque,v.instantArrivee, time(NULL));
 
 		vector<pid_t>::iterator itSorti = std::find(voituriersEnSortie.begin(),voituriersEnSortie.end(),filsFini);
 		voituriersEnSortie.erase(itSorti); //On efface le voiturier car plus besoin de le stocker
 
 
-		semop(semID,&vOp,1); //on effectue l'operation v pour le semaphore a compte i.e On incremente le nombre de places
+		semop(semID,&vOp,1); //on effectue l'operation v pour le semaphore à compte i.e On incremente le nombre de places
 
 
 		unsigned short int prio = gererPriorite(requetePorteBPPROF, requetePorteBPAUTRE, requetePorteGB);
@@ -221,11 +223,13 @@ static void receptionMortVoiturier(int noSignal)
 
 			while(semop(semID,&reserver,1)==-1 && errno==EINTR); //Reservation de la memoire
 
+
 			memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
 			a->requetes[prio-1] = {AUCUN, 0,0};	 //On efface la requete de la memoire
 			shmdt(a);
 
 			semop(semID,&liberer,1); //Liberation de la memoire
+
 
 
 			struct sembuf pOp = {prio,1,0};
@@ -238,12 +242,15 @@ static void receptionMortVoiturier(int noSignal)
 //---------------------------------------------------- Fonctions publiques
 
 
-void Sortie(int pmemID , int psemID){
+void Sortie(int pmemID , int psemID)
+//Mode d'emploi
+//	Processus fils Sortie
+{
 	memID = pmemID;
 	semID = psemID;
 
 
-	init();
+	initialisation();
 
 	for(;;){
 		moteur();

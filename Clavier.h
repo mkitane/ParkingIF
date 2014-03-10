@@ -12,8 +12,8 @@
 
 //------------------------------------------------------------------------
 // Rôle de la tâche <Clavier>
-//
-//
+//Cette tache permet de prendre en charge les entrées clavier de
+//l'utilisateur et de les traiter et effectuer les actions adéquates.
 //------------------------------------------------------------------------
 
 /////////////////////////////////////////////////////////////////  INCLUDE
@@ -30,13 +30,14 @@
 //---------------------------------------------------- Fonctions publiques
 void Clavier();
 // Mode d'emploi :
-//
+//		Processus fils Clavier
 // Contrat :
 //
 
 void Commande(char code, unsigned int valeur);
 // Mode d'emploi :
-//
+//		Cette procedure est appelé par Menu() et permet de gerer les entrées clavier
+//de l'utilisateur
 // Contrat :
 //
 

@@ -34,64 +34,67 @@
 //------------------------------------------------------------------ Types
 
 //---------------------------------------------------- Variables statiques
-static int descR;
-static map<pid_t,Voiture> mapVoiture;
+static int descR; //descripteur du canal qui relie le clavier a l'entree
+static map<pid_t,Voiture> mapVoiture; //Map qui stocke les voituriers entrain de se garer
 static int memID;
 static int semID;
 //------------------------------------------------------ Fonctions privées
-static void init(TypeBarriere Parametrage);
-static void moteur(TypeBarriere Parametrage);
 static void destruction(int noSignal);
 static void receptionMortVoiturier(int noSignal);
 
 
-static void init(TypeBarriere Parametrage){
+static void initialisation(TypeBarriere parametrage)
+//Mode d'emploi :
+//	Phase d'initialisation du processus Entree
+{
 	//Installation du handler destruction
 	struct sigaction action;
 	action.sa_handler = destruction ;
 	sigemptyset(&action.sa_mask);
 	action.sa_flags = 0 ;
-	//armer sigusr2 sur handlerEntree;
-	sigaction(SIGUSR2,&action,NULL);
+	sigaction(SIGUSR2,&action,NULL); //armer SIGUSR2 sur destruction;
 
 
-	//Installation du handler destruction
+
+	//Installation du handler actionFinVoiturier
 	struct sigaction actionFinVoiturier;
 	actionFinVoiturier.sa_handler = receptionMortVoiturier ;
 	sigemptyset(&actionFinVoiturier.sa_mask);
 	actionFinVoiturier.sa_flags = 0 ;
-	sigaction(SIGCHLD,&actionFinVoiturier,NULL);
+	sigaction(SIGCHLD,&actionFinVoiturier,NULL);  //armer SIGCHLD sur actionFinVoiturier;
 
-	switch(Parametrage)
+	switch(parametrage)
 	{
 		case(PROF_BLAISE_PASCAL):
-			//Prof Blaise Pascal
-			descR = open(CANAL_PROF_BP,O_RDONLY);
+			descR = open(CANAL_PROF_BP,O_RDONLY); 	//Ouverture Canal
 			break;
 		case(AUTRE_BLAISE_PASCAL):
-			descR = open(CANAL_AUTRE_BP,O_RDONLY);
+			descR = open(CANAL_AUTRE_BP,O_RDONLY);	//Ouverture Canal
 			break;
 		case(ENTREE_GASTON_BERGER):
-			descR = open(CANAL_GB,O_RDONLY);
+			descR = open(CANAL_GB,O_RDONLY);	//Ouverture Canal
 			break;
 		default:
 			break;
 	}
 }
 
-static void moteur(TypeBarriere Parametrage)
+static void moteur(TypeBarriere parametrage)
+//Mode d'emploi :
+//	Phase moteur du processus Entree
 {
 	Voiture voiture;
 	struct sembuf reserver = {MutexMP, -1,0};	//p Operation --> Reservation
 	struct sembuf liberer = {MutexMP, 1, 0};	//v Operation --> liberation
 
-		if(read(descR,&voiture,sizeof(Voiture)) > 0){
+		if(read(descR,&voiture,sizeof(Voiture)) > 0){ //lecture canal
 
-			DessinerVoitureBarriere(Parametrage,voiture.TypeUsager);
+			DessinerVoitureBarriere(parametrage,voiture.typeUsager);
 
-			if( semctl(semID,SemaphoreCompteurPlaces,GETVAL,0) <= 0){
+			if( semctl(semID,SemaphoreCompteurPlaces,GETVAL,0) <= 0){ //Recuperation valeur du semaphore a compte
+				//Si il ne reste plus de place
 				//On place en liste d'attente !
-				AfficherRequete(Parametrage, voiture.TypeUsager, voiture.heureArrivee);
+				AfficherRequete(parametrage, voiture.typeUsager, voiture.instantArrivee);
 
 
 				//On ecrit dans la mémoire partagée que l'on a une requete !
@@ -100,9 +103,9 @@ static void moteur(TypeBarriere Parametrage)
 				while(semop(semID,&reserver,1)==-1 && errno==EINTR); //Reservation de la memoire partagee
 
 				//Ecrire la voiture sur la mémoire partagée
-				memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
-				a->requetes[Parametrage-1] =  voiture ;
-				shmdt(a);
+				memStruct *a = (memStruct *) shmat(memID, NULL, 0) ; //attachement
+				a->requetes[parametrage-1] =  voiture ;
+				shmdt(a); //detachement
 
 
 				semop(semID,&liberer,1); //Liberation de la memoire partagee
@@ -110,10 +113,10 @@ static void moteur(TypeBarriere Parametrage)
 
 
 
-				struct sembuf pOp = {Parametrage,-1,0};  //p Operation sur le mutex de synchronisation
+				struct sembuf pOp = {parametrage,-1,0};  //p Operation sur le mutex de synchronisation
 				while(semop(semID,&pOp,1)==-1 && errno==EINTR);
 
-				Effacer((TypeZone)(ETAT_P8+Parametrage));
+				Effacer((TypeZone)(ETAT_P8+parametrage));
 			}
 
 
@@ -125,7 +128,7 @@ static void moteur(TypeBarriere Parametrage)
 
 
 			// garage voiture ajout du pid voiturier dans la list
-			pid_t voiturier=GarerVoiture(Parametrage);
+			pid_t voiturier=GarerVoiture(parametrage);
 			mapVoiture.insert(pair<pid_t,Voiture>(voiturier,voiture));
 
 			//sleep 1s
@@ -135,6 +138,8 @@ static void moteur(TypeBarriere Parametrage)
 }
 
 static void destruction(int noSignal)
+//Mode d'emploi :
+//	Phase de destruction du processus Entree
 {
 	if(noSignal == SIGUSR2){
 		//On masque SIGCHLD avant de killer !
@@ -142,24 +147,26 @@ static void destruction(int noSignal)
 		action.sa_handler = SIG_IGN ;
 		sigemptyset(&action.sa_mask);
 		action.sa_flags = 0 ;
-		//armer sigusr2 sur handlerEntree;
 		sigaction(SIGCHLD,&action,NULL);
 
 
 
+
 		for(map<pid_t,Voiture>::iterator it=mapVoiture.begin(); it!= mapVoiture.end() ; it++){
-			kill(it->first,SIGUSR2);
+			kill(it->first,SIGUSR2); //Envoi du signal SIGUSR2 aux voitures en train de se garer
 		}
 		for(map<pid_t,Voiture>::iterator it=mapVoiture.begin(); it!= mapVoiture.end() ; it++){
-			waitpid(it->first,NULL,0);
+			waitpid(it->first,NULL,0); //Attente de la fin des voitures a laquelles on a envoyé un signal
 		}
 
-		close(descR);
+		close(descR); //fermeture canal
 		exit(0);
 	}
 }
 
 static void receptionMortVoiturier(int noSignal)
+//Mode d'emploi
+//	Handler pour le signal SIGCHLD
 {
 
 	if(noSignal == SIGCHLD){
@@ -177,22 +184,22 @@ static void receptionMortVoiturier(int noSignal)
 		Voiture v = itLE ->second ;
 
 		//Afficher ses caractéristiques dans l'endroit indique
-		AfficherPlace(WEXITSTATUS(status),v.TypeUsager,v.numeroVoiture,v.heureArrivee);
+		AfficherPlace(WEXITSTATUS(status),v.typeUsager,v.numeroPlaque,v.instantArrivee);
 
 
 
 
-		while(semop(semID,&reserver,1)==-1 && errno==EINTR);
+		while(semop(semID,&reserver,1)==-1 && errno==EINTR); //Reservation de la memoire
 
 
 		//Ecrire la voiture sur la mémoire partagée
-		memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
-		a->voituresPartagee[WEXITSTATUS(status)-1] = v ;
-		shmdt(a);
+		memStruct *a = (memStruct *) shmat(memID, NULL, 0) ; //attachment
+		a->placesParking[WEXITSTATUS(status)-1] = v ;
+		shmdt(a); //detachement
 
 
 
-		semop(semID,&liberer,1);
+		semop(semID,&liberer,1); //Liberation de la memoire
 
 
 
@@ -206,14 +213,17 @@ static void receptionMortVoiturier(int noSignal)
 //---------------------------------------------------- Fonctions publiques
 
 
-void Entree(TypeBarriere Parametrage,int pmemID, int psemID){
-	memID = pmemID;
-	semID = psemID;
+void Entree(TypeBarriere parametrage,int pmemID, int psemID)
+//Mode d'emploi :
+//Processus Fils Entree
+{
+	memID = pmemID; //Récuperation de l'identifiant de la mémoire partagée
+	semID = psemID; //Récuperation de l'identifiant du sémaphore général
 
-	init(Parametrage);
+	initialisation(parametrage);
 
 	for(;;){
-		moteur(Parametrage);
+		moteur(parametrage);
 	}
 }
 

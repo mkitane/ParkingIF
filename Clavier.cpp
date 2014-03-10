@@ -13,7 +13,6 @@
 
 //------------------------------------------------------ Include personnel
 #include "Clavier.h"
-#include "/public/tp/tp-multitache/Outils.h"
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -30,40 +29,48 @@ static int descAutreBPW ;
 static int compteurVoiture = 0;
 
 //------------------------------------------------------ Fonctions privées
-static void init()
+static void initialisation()
+//Mode d'emploi :
+//	Phase d'initialisation du processus Clavier
 {
-	//Ouverture Canal
+	//Ouverture des canaux
 	descProfBPW = open(CANAL_PROF_BP,O_WRONLY);
 	descAutreBPW  = open(CANAL_AUTRE_BP,O_WRONLY);
 	descGBW = open(CANAL_GB,O_WRONLY);
 	descSortieW = open(CANAL_SORTIE, O_WRONLY);
-}
+}//---Fin de initialisation
 
 static void destruction()
+//Mode d'emploi :
+//	Phase de destruction du processus Clavier
 {
+	//Fermeture des canaux
 	close(descSortieW);
 	close(descGBW);
 	close(descAutreBPW);
 	close(descProfBPW);
 
 	exit(0);
-}
+}//---Fin de destruction
+
+
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 
 void Clavier()
-// Algorithme :
+//Mode d'emploi:
+//	 Processus Fils Clavier
 //
 {
-	init();
+	initialisation();
 
 	for(;;){
 		Menu();
 	}
-} //----- fin de Nom
+} //----- fin de Clavier
 
 void Commande(char code, unsigned int valeur)
-// Algorithme :
+// Mode d'emploi :
 //
 {
 	if(code == 'Q'){
@@ -71,44 +78,45 @@ void Commande(char code, unsigned int valeur)
 	}else if(code == 'P'){
 		compteurVoiture++;
 		if(compteurVoiture > 999){
-			compteurVoiture=0;
+			compteurVoiture=0;  //Reinitialisation du compteur
 		}
 
+
 		Voiture voiture;
-		voiture.numeroVoiture = compteurVoiture;
-		voiture.heureArrivee = time(NULL);
-		voiture.TypeUsager = PROF;
+		voiture.numeroPlaque = compteurVoiture;
+		voiture.instantArrivee = time(NULL);
+		voiture.typeUsager = PROF;
 
 		if(valeur == 1){
 			//Prof Blaise Pascal
-			write(descProfBPW,&voiture,sizeof(voiture));
+			write(descProfBPW,&voiture,sizeof(voiture));//Ecriture de la voiture arrivée dans le canal
 		}
 		if(valeur == 2){
 			//Prof Gaston Berger
-			write(descGBW,&voiture,sizeof(voiture));
+			write(descGBW,&voiture,sizeof(voiture)); //Ecriture de la voiture arrivée dans le canal
 		}
 	}else if(code == 'A'){
 		compteurVoiture++;
 		if(compteurVoiture > 999){
-			compteurVoiture=0;
+			compteurVoiture=0; //Reinitialisation du compteur
 		}
 
 
 		Voiture voiture;
-		voiture.numeroVoiture = compteurVoiture;
-		voiture.heureArrivee = time(NULL);
-		voiture.TypeUsager = AUTRE;
+		voiture.numeroPlaque = compteurVoiture;
+		voiture.instantArrivee = time(NULL);
+		voiture.typeUsager = AUTRE;
 
 
 		if(valeur ==1){
 			//Autre Blaise Pascal
-			write(descAutreBPW,&voiture,sizeof(voiture));
+			write(descAutreBPW,&voiture,sizeof(voiture));//Ecriture de la voiture arrivée dans le canal
 		}
 		if(valeur == 2){
 			//Autre Gaston Berger
-			write(descGBW,&voiture,sizeof(voiture));
+			write(descGBW,&voiture,sizeof(voiture));//Ecriture de la voiture arrivée dans le canal
 		}
 	}else if(code == 'S'){
-		write(descSortieW,&valeur,sizeof(int));
+		write(descSortieW,&valeur,sizeof(int));//Ecriture du numero de la place a sortir
 	}
-}
+}//--Fin de commande

@@ -12,13 +12,12 @@
 
 //------------------------------------------------------------------------
 // Rôle de la tâche <Entree>
-//
-//
+//	La tache Entrée permet de gérer les voituriers qui rentrent dans le
+//	Parking
 //------------------------------------------------------------------------
 
 /////////////////////////////////////////////////////////////////  INCLUDE
 //--------------------------------------------------- Interfaces utilisées
-#include "/public/tp/tp-multitache/Outils.h"
 #include "ConfigParking.h"
 //------------------------------------------------------------- Constantes
 
@@ -26,10 +25,9 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-void Entree(TypeBarriere Parametrage, int pmemID, int psemID);
-//TODO : CHANGER LE INT PARAMETRAGE PLUTARD
+void Entree(TypeBarriere parametrage, int pmemID, int psemID);
 // Mode d'emploi :
-//
+//	Processus fils Entree
 // Contrat :
 //
 
