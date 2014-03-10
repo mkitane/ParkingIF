@@ -58,7 +58,7 @@ static bool operator < (enum TypeUsager lhs, enum TypeUsager rhs)
     if(lhs == 1 && rhs == 2) return false;
     return (int)lhs<(int)rhs;
 }
-static int getMax(Voiture const &a, Voiture const &b, Voiture const &c){
+static int gererPriorite(Voiture const &a, Voiture const &b, Voiture const &c){
 	Voiture requetePrio = a;
 	//Ordre Type Usager = AUCUN,PROF,AUTRE
 
@@ -96,34 +96,6 @@ static int getMax(Voiture const &a, Voiture const &b, Voiture const &c){
 
     return 0;
 }
-static int gererPriorite(int memID){
-	Voiture requetePorteBPPROF;
-	Voiture requetePorteBPAUTRE;
-	Voiture requetePorteGB;
-
-	//Baisser Mutex Pour lecture sur memoire
-	{
-	//On met en place le mutex
-	struct sembuf pOp = {MutexMP,-1,0};
-	while(semop(semID,&pOp,1)==-1 && errno==EINTR);
-	}
-
-	memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
-	requetePorteBPPROF = a->requetes[(int)PROF_BLAISE_PASCAL -1];
-	requetePorteBPAUTRE = a->requetes[(int)AUTRE_BLAISE_PASCAL -1];
-	requetePorteGB = a->requetes[(int)ENTREE_GASTON_BERGER -1];
-	shmdt(a);
-	//Lever mutex
-	{
-	//On relache le mutex
-	struct sembuf vOp = {MutexMP,1,0};
-	semop(semID,&vOp,1);
-	}
-
-	//Gestion Priorite
-	//Rappel Prof tjrs Prioritaire Ensuite Temps
-	return getMax(requetePorteBPPROF, requetePorteBPAUTRE, requetePorteGB);
-}
 
 
 static void init();
@@ -147,6 +119,7 @@ static void init()
 	sigemptyset(&actionMortVoiturier.sa_mask);
 	actionMortVoiturier.sa_flags = 0 ;
 	sigaction(SIGCHLD,&actionMortVoiturier,NULL); //armer SigCHLD sur receptionMortVoiturier;
+
 
 	//Ouverture du canal de la sortie
 	descR = open(CANAL_SORTIE,O_RDONLY);
@@ -195,64 +168,68 @@ static void receptionMortVoiturier(int noSignal)
 {
 
 	if(noSignal == SIGCHLD){
+		struct sembuf reserver = {MutexMP, -1,0};	//p Operation --> Reservation
+		struct sembuf liberer = {MutexMP, 1, 0};	//v Operation --> liberation
+		struct sembuf vOp = {SemaphoreCompteurPlaces,1,0};
+
 		int status;
-		//Recuperer le fils qui a envoye le SIGCHLD
-		pid_t filsFini = wait(&status);
-
-		//Efface la bonne voiture sur lecran
-		Effacer((TypeZone)WEXITSTATUS(status));
+		Voiture requetePorteBPPROF;
+		Voiture requetePorteBPAUTRE;
+		Voiture requetePorteGB;
 
 
 
-		//Recuperer la voiture sur la mémoire partagée
-		{
-		//On met en place le mutex
-		struct sembuf pOp = {MutexMP,-1,0};
-		while(semop(semID,&pOp,1)==-1 && errno==EINTR);
-		}
+
+		pid_t filsFini = wait(&status); //Recuperer le fils qui a envoye le SIGCHLD
+
+
+		Effacer((TypeZone)WEXITSTATUS(status)); //Efface la bonne place sur l'ecran
+
+
+
+
+
+		while(semop(semID,&reserver,1)==-1 && errno==EINTR); //Reservation de la memoire
+
+
+		//Recuperer la voiture et les demandes d'entree sur la mémoire partagée
 		memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
 		Voiture v = a->voituresPartagee[WEXITSTATUS(status)-1] ;
+		requetePorteBPPROF = a->requetes[(int)PROF_BLAISE_PASCAL -1];
+		requetePorteBPAUTRE = a->requetes[(int)AUTRE_BLAISE_PASCAL -1];
+		requetePorteGB = a->requetes[(int)ENTREE_GASTON_BERGER -1];
 		shmdt(a);
-		{
-		//On relache le mutex
-		struct sembuf vOp = {MutexMP,1,0};
-		semop(semID,&vOp,1);
-		}
+
+		semop(semID,&liberer,1); //Liberation de la memoire
+
 
 
 		AfficherSortie(v.TypeUsager,v.numeroVoiture,v.heureArrivee, time(NULL));
 
 		vector<pid_t>::iterator itSorti = std::find(voituriersEnSortie.begin(),voituriersEnSortie.end(),filsFini);
-		voituriersEnSortie.erase(itSorti);
+		voituriersEnSortie.erase(itSorti); //On efface le voiturier car plus besoin de le stocker
 
 
-		struct sembuf vOp = {SemaphoreCompteurPlaces,1,0};
-		semop(semID,&vOp,1);
+		semop(semID,&vOp,1); //on effectue l'operation v pour le semaphore a compte i.e On incremente le nombre de places
 
 
-		unsigned short int prio = gererPriorite(memID);
+		unsigned short int prio = gererPriorite(requetePorteBPPROF, requetePorteBPAUTRE, requetePorteGB);
+
 		if(prio!=0){
 			//Si une requete est en attente, on la satisfait!
 
 
-			{
-			//On met en place le mutex
-			struct sembuf pOp = {MutexMP,-1,0};
-			while(semop(semID,&pOp,1)==-1 && errno==EINTR);
-			}
+			while(semop(semID,&reserver,1)==-1 && errno==EINTR); //Reservation de la memoire
+
 			memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
-			a->requetes[prio-1] = {AUCUN, 0,0};
+			a->requetes[prio-1] = {AUCUN, 0,0};	 //On efface la requete de la memoire
 			shmdt(a);
 
-			{
-			//On relache le mutex
-			struct sembuf vOp = {MutexMP,1,0};
-			semop(semID,&vOp,1);
-			}
+			semop(semID,&liberer,1); //Liberation de la memoire
 
 
-			struct sembuf pOp2 = {prio,1,0};
-			semop(semID,&pOp2,1);
+			struct sembuf pOp = {prio,1,0};
+			semop(semID,&pOp,1); //On relache le bon semaphore de synchronisation i.e on liberer la bonne porte
 		}
 
 	}

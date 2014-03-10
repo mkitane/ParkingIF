@@ -73,7 +73,6 @@ void Commande(char code, unsigned int valeur)
 		if(compteurVoiture > 999){
 			compteurVoiture=0;
 		}
-		Afficher(MESSAGE,"P pressed");
 
 		Voiture voiture;
 		voiture.numeroVoiture = compteurVoiture;
@@ -89,7 +88,6 @@ void Commande(char code, unsigned int valeur)
 			write(descGBW,&voiture,sizeof(voiture));
 		}
 	}else if(code == 'A'){
-		Afficher(MESSAGE,"A pressed");
 		compteurVoiture++;
 		if(compteurVoiture > 999){
 			compteurVoiture=0;
@@ -111,7 +109,6 @@ void Commande(char code, unsigned int valeur)
 			write(descGBW,&voiture,sizeof(voiture));
 		}
 	}else if(code == 'S'){
-		Afficher(MESSAGE,"S pressed");
 		write(descSortieW,&valeur,sizeof(int));
 	}
 }

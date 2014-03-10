@@ -82,6 +82,8 @@ static void init(TypeBarriere Parametrage){
 static void moteur(TypeBarriere Parametrage)
 {
 	Voiture voiture;
+	struct sembuf reserver = {MutexMP, -1,0};	//p Operation --> Reservation
+	struct sembuf liberer = {MutexMP, 1, 0};	//v Operation --> liberation
 
 		if(read(descR,&voiture,sizeof(Voiture)) > 0){
 
@@ -93,30 +95,25 @@ static void moteur(TypeBarriere Parametrage)
 
 
 				//On ecrit dans la mémoire partagée que l'on a une requete !
-				{
-				//On met en place le mutex
-				struct sembuf pOp = {MutexMP,-1,0};
-				while(semop(semID,&pOp,1)==-1 && errno==EINTR);
-				}
+
+
+				while(semop(semID,&reserver,1)==-1 && errno==EINTR); //Reservation de la memoire partagee
+
 				//Ecrire la voiture sur la mémoire partagée
 				memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
 				a->requetes[Parametrage-1] =  voiture ;
 				shmdt(a);
 
-				{
-				//On relache le mutex
-				struct sembuf vOp = {MutexMP,1,0};
-				semop(semID,&vOp,1);
-				}
+
+				semop(semID,&liberer,1); //Liberation de la memoire partagee
 
 
 
-				struct sembuf pOp = {Parametrage,-1,0};
-				//Le processus reçoit un signal à intercepter, la valeur de semncnt est décrémentée et semop()
-				//échoue avec errno contenant le code d'erreur EINTR.
+
+				struct sembuf pOp = {Parametrage,-1,0};  //p Operation sur le mutex de synchronisation
 				while(semop(semID,&pOp,1)==-1 && errno==EINTR);
 
-				Effacer((TypeZone)(8+Parametrage));
+				Effacer((TypeZone)(ETAT_P8+Parametrage));
 			}
 
 
@@ -166,6 +163,10 @@ static void receptionMortVoiturier(int noSignal)
 {
 
 	if(noSignal == SIGCHLD){
+		struct sembuf reserver = {MutexMP, -1,0};	//p Operation --> Reservation
+		struct sembuf liberer = {MutexMP, 1, 0};	//v Operation --> liberation
+
+
 		int status;
 		//Recuperer le fils qui a envoye le SIGCHLD
 		pid_t filsFini = wait(&status);
@@ -180,22 +181,19 @@ static void receptionMortVoiturier(int noSignal)
 
 
 
-		{
-		//On met en place le mutex
-		struct sembuf pOp = {MutexMP,-1,0};
-		while(semop(semID,&pOp,1)==-1 && errno==EINTR);
-		}
+
+		while(semop(semID,&reserver,1)==-1 && errno==EINTR);
+
 
 		//Ecrire la voiture sur la mémoire partagée
 		memStruct *a = (memStruct *) shmat(memID, NULL, 0) ;
 		a->voituresPartagee[WEXITSTATUS(status)-1] = v ;
 		shmdt(a);
 
-		{
-		//On relache le mutex
-		struct sembuf vOp = {MutexMP,1,0};
-		semop(semID,&vOp,1);
-		}
+
+
+		semop(semID,&liberer,1);
+
 
 
 
